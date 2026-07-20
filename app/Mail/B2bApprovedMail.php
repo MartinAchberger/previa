@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Mail;
+
+use App\Models\B2bUser;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Queue\SerializesModels;
+
+class B2bApprovedMail extends Mailable implements ShouldQueue
+{
+    use Queueable, SerializesModels;
+
+    public function __construct(public B2bUser $user) {}
+
+    public function envelope(): Envelope
+    {
+        return new Envelope(subject: 'Partnerský účet aktivovaný - PREVIA');
+    }
+
+    public function content(): Content
+    {
+        return new Content(view: 'emails.b2b-approved', with: ['user' => $this->user]);
+    }
+}

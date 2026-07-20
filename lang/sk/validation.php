@@ -1,0 +1,76 @@
+<?php
+
+/*
+ * Slovak validation messages for customer-facing forms (checkout, quiz, B2B).
+ * The Orchid admin panel has no `sk` bundle and falls back to English.
+ */
+
+return [
+    'accepted' => 'Pole :attribute musí byť akceptované.',
+    'active_url' => 'Pole :attribute nie je platná URL adresa.',
+    'after' => 'Pole :attribute musí byť dátum po :date.',
+    'alpha' => 'Pole :attribute môže obsahovať iba písmená.',
+    'alpha_dash' => 'Pole :attribute môže obsahovať iba písmená, čísla a pomlčky.',
+    'alpha_num' => 'Pole :attribute môže obsahovať iba písmená a čísla.',
+    'array' => 'Pole :attribute musí byť zoznam.',
+    'before' => 'Pole :attribute musí byť dátum pred :date.',
+    'between' => [
+        'numeric' => 'Pole :attribute musí byť medzi :min a :max.',
+        'file' => 'Pole :attribute musí byť medzi :min a :max kilobajtami.',
+        'string' => 'Pole :attribute musí mať medzi :min a :max znakmi.',
+        'array' => 'Pole :attribute musí mať medzi :min a :max položkami.',
+    ],
+    'boolean' => 'Pole :attribute musí byť áno alebo nie.',
+    'confirmed' => 'Potvrdenie poľa :attribute sa nezhoduje.',
+    'date' => 'Pole :attribute nie je platný dátum.',
+    'email' => 'Pole :attribute musí byť platná e-mailová adresa.',
+    'exists' => 'Zvolená hodnota poľa :attribute je neplatná.',
+    'file' => 'Pole :attribute musí byť súbor.',
+    'filled' => 'Pole :attribute musí byť vyplnené.',
+    'in' => 'Zvolená hodnota poľa :attribute je neplatná.',
+    'integer' => 'Pole :attribute musí byť celé číslo.',
+    'max' => [
+        'numeric' => 'Pole :attribute nesmie byť väčšie ako :max.',
+        'file' => 'Pole :attribute nesmie byť väčšie ako :max kilobajtov.',
+        'string' => 'Pole :attribute nesmie byť dlhšie ako :max znakov.',
+        'array' => 'Pole :attribute nesmie mať viac ako :max položiek.',
+    ],
+    'min' => [
+        'numeric' => 'Pole :attribute musí byť minimálne :min.',
+        'file' => 'Pole :attribute musí mať minimálne :min kilobajtov.',
+        'string' => 'Pole :attribute musí mať minimálne :min znakov.',
+        'array' => 'Pole :attribute musí mať minimálne :min položiek.',
+    ],
+    'numeric' => 'Pole :attribute musí byť číslo.',
+    'regex' => 'Formát poľa :attribute je neplatný.',
+    'required' => 'Pole :attribute je povinné.',
+    'required_if' => 'Pole :attribute je povinné, keď :other je :value.',
+    'string' => 'Pole :attribute musí byť text.',
+    'unique' => 'Hodnota poľa :attribute je už obsadená.',
+    'url' => 'Formát poľa :attribute je neplatný.',
+
+    'attributes' => [
+        'customer_name' => 'meno a priezvisko',
+        'customer_email' => 'e-mail',
+        'customer_phone' => 'telefón',
+        'payment_method' => 'spôsob platby',
+        'shipping_method' => 'spôsob dopravy',
+        'billing_address' => 'fakturačná adresa',
+        'billing_city' => 'mesto',
+        'billing_zip' => 'PSČ',
+        'billing_country' => 'krajina',
+        'shipping_address' => 'doručovacia adresa',
+        'shipping_city' => 'mesto',
+        'shipping_zip' => 'PSČ',
+        'shipping_country' => 'krajina',
+        'company_name' => 'názov firmy',
+        'ico' => 'IČO',
+        'vat_id' => 'IČ DPH',
+        'notes' => 'poznámka',
+        'items' => 'košík',
+        'salon_name' => 'názov salónu',
+        'contact_name' => 'kontaktná osoba',
+        'password' => 'heslo',
+        'email' => 'e-mail',
+    ],
+];

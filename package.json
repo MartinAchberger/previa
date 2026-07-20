@@ -1,0 +1,14 @@
+{
+  "name": "previa",
+  "private": true,
+  "scripts": {
+    "build:css": "sass --no-source-map resources/scss/app.scss:public/css/app.css",
+    "build:js": "node -e \"const fs=require('fs');const path=require('path');const src='resources/js';const dest='public/js';if(!fs.existsSync(dest))fs.mkdirSync(dest,{recursive:true});for(const f of fs.readdirSync(src))if(f.endsWith('.js'))fs.copyFileSync(path.join(src,f),path.join(dest,f));console.log('JS copied:',fs.readdirSync(src).filter(f=>f.endsWith('.js')).length,'files');\"",
+    "dev": "npm run build:css && npm run build:js",
+    "prod": "sass --no-source-map --style=compressed resources/scss/app.scss:public/css/app.css && npm run build:js",
+    "watch": "sass --watch --no-source-map resources/scss/app.scss:public/css/app.css"
+  },
+  "devDependencies": {
+    "sass": "^1.85.1"
+  }
+}
