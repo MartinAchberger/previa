@@ -33,8 +33,8 @@
     </div>
     <h1>Všetky<br><em>produkty.</em></h1>
     <div class="meta">
-        <div class="ds">Lorem ipsum dolor sit amet, consectetur adipiscing elit sed do eiusmod.</div>
-        <a href="{{ route('quiz.show') }}" class="cnt" style="text-decoration:none;color:inherit;border:1px solid var(--line);padding:10px 18px">Lorem ipsum dolor sit amet consectetur?</a>
+        <div class="ds">Profesionálna vlasová kozmetika z Talianska · až 97 % prírodných ingrediencií · vegan &amp; cruelty-free.</div>
+        <a href="{{ route('quiz.show') }}" class="cnt" style="text-decoration:none;color:inherit;border:1px solid var(--line);padding:10px 18px">Nájdite rutinu pre svoje vlasy →</a>
     </div>
 </section>
 

@@ -1,3 +1,3 @@
 <div class="bar">
-    Lorem ipsum dolor sit amet <span class="dot">·</span> Consectetur adipiscing elit <span class="dot">·</span> Sed do eiusmod tempor
+    Made in Italy <span class="dot">·</span> Až 97 % prírodných ingrediencií <span class="dot">·</span> Vegan &amp; cruelty-free
 </div>

@@ -9,7 +9,7 @@
     $tone  ??= '#0b0b0a';
     $cap   ??= $tone;
     $label ??= 'PREVIA';
-    $sub   ??= 'HX-94';
+    $sub = ($sub ?? '') ?: 'Made in Italy';
     $n     ??= '01';
 @endphp
 

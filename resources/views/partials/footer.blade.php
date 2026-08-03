@@ -5,7 +5,7 @@
                 <span class="ft-word">Previa</span>
                 <span class="ft-sub">Italian Haircare · Distribúcia SK</span>
             </div>
-            <p class="ft-blurb">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+            <p class="ft-blurb">Profesionálna vlasová starostlivosť inšpirovaná prírodou. Objavte kolekcie PREVIA vytvorené pre zdravú pokožku hlavy a prirodzene krásne vlasy.</p>
         </div>
         <div>
             <h4>Eshop</h4>

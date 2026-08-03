@@ -8,7 +8,7 @@
 @php
     $line = $product->line;
     $defaultIngredients = [
-        ['n' => '01', 'name' => 'Aktívny komplex ' . ($product->complex ?? ''), 'small' => 'Talianske laboratórium · patent', 'pct' => '1,8 %'],
+        ['n' => '01', 'name' => trim('Aktívny komplex ' . ($product->complex ?? '')), 'small' => 'Talianske laboratórium · patent', 'pct' => '1,8 %'],
         ['n' => '02', 'name' => 'Botanické zložky', 'small' => 'Lisované za studena · prírodné', 'pct' => '2,4 %'],
         ['n' => '03', 'name' => 'Pantenol (B5)', 'small' => 'Preniká do kortexu', 'pct' => '1,2 %'],
         ['n' => '04', 'name' => 'Mierny tenzid', 'small' => 'Rastlinného pôvodu, biodegradovateľné', 'pct' => '8,0 %'],
@@ -50,7 +50,7 @@
             @if($product->image_url)
                 <img src="{{ $product->image_url }}" alt="{{ $product->name }}" style="width:100%;height:100%;object-fit:contain;display:block;padding:8%;box-sizing:border-box">
             @else
-                @include('partials.bottle', ['kind' => $product->kind, 'tone' => $product->tone, 'cap' => $product->cap ?: $product->tone, 'sub' => $product->complex ?: 'PH', 'n' => $product->code, 'label' => 'PREVIA'])
+                @include('partials.bottle', ['kind' => $product->kind, 'tone' => $product->tone, 'cap' => $product->cap ?: $product->tone, 'sub' => $product->complex ?: 'Made in Italy', 'n' => $product->code, 'label' => 'PREVIA'])
             @endif
         </div>
     </div>

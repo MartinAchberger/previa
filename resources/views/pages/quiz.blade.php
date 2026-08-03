@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
 @section('title', 'Diagnostika vlasov - PREVIA')
-@section('description', 'Personalizovaná rutina pre tvoje vlasy. Štyri otázky, presné odporúčanie zo siedmich línií PREVIA.')
+@section('description', 'Vyplňte diagnostiku za menej ako 60 sekúnd a získajte odporúčanie kolekcie PREVIA presne podľa typu vlasov, pokožky hlavy a vašich potrieb.')
 
 @section('content')
 
 <section class="quiz">
     <div class="quiz-head">
-        <div class="eyebrow">Lorem ipsum · Dolor sit</div>
-        <h1>Lorem ipsum<br><em>dolor sit amet.</em></h1>
-        <p class="lede">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.</p>
+        <div class="eyebrow">Profesionálna diagnostika vlasov</div>
+        <h1>Nájdite rutinu, ktorú vaše<br><em>vlasy skutočne potrebujú.</em></h1>
+        <p class="lede">Vyplňte diagnostiku za menej ako 60 sekúnd a získajte odporúčanie kolekcie PREVIA presne podľa typu vlasov, pokožky hlavy a vašich potrieb.</p>
     </div>
 
     <div class="quiz-progress" data-quiz-progress>
