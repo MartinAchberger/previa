@@ -5253,6 +5253,10 @@ input.is-invalid, select.is-invalid, textarea.is-invalid {
   text-align: center;
 }
 
+.brand .brand-img {
+  margin: 0 auto;
+}
+
 .brand-word {
   display: block;
   font-family: var(--serif);
@@ -5533,6 +5537,12 @@ input.is-invalid, select.is-invalid, textarea.is-invalid {
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.5);
   margin-top: 8px;
+}
+
+.ft-logo {
+  height: 76px;
+  width: auto;
+  display: block;
 }
 
 /* formulárové prvky zdedia teplé pozadie */

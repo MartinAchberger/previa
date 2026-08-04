@@ -1080,6 +1080,7 @@ input.is-invalid, select.is-invalid, textarea.is-invalid { border-color: #a4392f
 .nav { grid-template-columns: 1fr auto 1fr; padding: 20px 56px; gap: 32px; }
 .nav-c { justify-content: flex-start; font-size: 12px; letter-spacing: 0.04em; }
 .brand { display: block; text-align: center; }
+.brand .brand-img { margin: 0 auto; }
 .brand-word { display: block; font-family: var(--serif); font-weight: 600; font-size: 24px; letter-spacing: 0.46em; text-transform: uppercase; padding-left: 0.42em; line-height: 1; color: var(--ink); }
 .brand-sub { display: block; font-family: var(--sans); font-size: 9px; letter-spacing: 0.5em; text-transform: uppercase; color: var(--mute); text-align: center; margin-top: 6px; padding-left: 0.5em; }
 .nav-r .b2b { font-family: var(--serif); font-style: normal; text-transform: uppercase; letter-spacing: 0.18em; font-size: 11px; padding: 7px 14px; }
@@ -1149,6 +1150,7 @@ input.is-invalid, select.is-invalid, textarea.is-invalid { border-color: #a4392f
 /* footer — textový logotyp */
 .ft-word { display: block; font-family: var(--serif); font-weight: 600; font-size: 21px; letter-spacing: 0.46em; text-transform: uppercase; color: var(--bg); line-height: 1; }
 .ft-sub { display: block; font-size: 9px; letter-spacing: 0.5em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-top: 8px; }
+.ft-logo { height: 76px; width: auto; display: block; }
 
 /* formulárové prvky zdedia teplé pozadie */
 .ck-fi input, .ck-fi select, .ck-fi textarea { background: var(--bg-3); }

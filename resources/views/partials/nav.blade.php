@@ -8,8 +8,7 @@
         <a href="{{ route('philosophy.show') }}" class="{{ $active === 'philosophy' ? 'active' : '' }}">Filozofia</a>
     </div>
     <a href="{{ route('home') }}" class="brand" aria-label="PREVIA">
-        <span class="brand-word">Previa</span>
-        <span class="brand-sub">Italian Haircare · Distribúcia SK</span>
+        <img src="{{ asset('images/previa-logo.png') }}" alt="PREVIA – Natural Haircare Italia" class="brand-img">
     </a>
     <div class="nav-r">
         @if($b2b)

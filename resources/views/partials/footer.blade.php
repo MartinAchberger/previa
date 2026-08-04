@@ -2,8 +2,7 @@
     <div class="ft-top">
         <div>
             <div class="b">
-                <span class="ft-word">Previa</span>
-                <span class="ft-sub">Italian Haircare · Distribúcia SK</span>
+                <img src="{{ asset('images/previa-logo-light.png') }}" alt="PREVIA" class="ft-logo">
             </div>
             <p class="ft-blurb">Profesionálna vlasová starostlivosť inšpirovaná prírodou. Objavte kolekcie PREVIA vytvorené pre zdravú pokožku hlavy a prirodzene krásne vlasy.</p>
         </div>
