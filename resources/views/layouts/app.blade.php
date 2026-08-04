@@ -33,6 +33,7 @@
 
     <script src="{{ asset('js/cart.js') }}?v={{ filemtime(public_path('js/cart.js')) }}"></script>
     <script src="{{ asset('js/reveal.js') }}?v={{ filemtime(public_path('js/reveal.js')) }}" defer></script>
+    <script src="{{ asset('js/validate.js') }}?v={{ filemtime(public_path('js/validate.js')) }}" defer></script>
     @stack('scripts')
 
 </body>

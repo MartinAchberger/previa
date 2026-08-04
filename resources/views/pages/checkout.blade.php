@@ -207,7 +207,8 @@
                     <input type="radio" id="pay-card" name="payment_method" value="card">
                     <label for="pay-card">
                         <strong>Online platba kartou</strong>
-                        <small>Visa / Mastercard cez Stripe. Po odoslaní budete presmerovaní na bezpečnú platobnú bránu.</small>
+                        <small>Rýchla a bezpečná platba kartou alebo cez Apple Pay.</small>
+                        @include('partials.payment-icons')
                     </label>
                 </div>
                 @if (!empty($canPayByInvoice))

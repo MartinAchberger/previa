@@ -40,28 +40,38 @@
 
 <div class="shop-body">
     <aside class="shop-fil">
-        <div class="grp">
-            <h4>Línia</h4>
-            @foreach($lines as $line)
-                <a href="{{ $toggleUrl('line', $line->slug) }}" class="opt {{ $activeLine === $line->slug ? 'on' : '' }}" style="text-decoration:none;color:inherit;display:flex">
-                    <div class="box"></div>
-                    <div class="lab">{{ $line->name }}</div>
-                    <span class="cnt">{{ str_pad($line->products()->where('published', true)->count(), 2, '0', STR_PAD_LEFT) }}</span>
-                </a>
-            @endforeach
-        </div>
+        <button type="button" class="shop-fil-toggle" data-fil-toggle aria-expanded="false">
+            <span>Filtre{{ $hasAnyFilter ? ' (' . (($activeLine ? 1 : 0) + ($activeType ? 1 : 0)) . ')' : '' }}</span>
+            <span class="chev" aria-hidden="true"></span>
+        </button>
+        <div class="fil-groups">
+            <div class="grp {{ $activeLine ? 'open' : '' }}">
+                <h4><button type="button" class="grp-head" data-grp-toggle aria-expanded="{{ $activeLine ? 'true' : 'false' }}">Línia <span class="chev" aria-hidden="true"></span></button></h4>
+                <div class="grp-body">
+                    @foreach($lines as $line)
+                        <a href="{{ $toggleUrl('line', $line->slug) }}" class="opt {{ $activeLine === $line->slug ? 'on' : '' }}" style="text-decoration:none;color:inherit;display:flex">
+                            <div class="box"></div>
+                            <div class="lab">{{ $line->name }}</div>
+                            <span class="cnt">{{ str_pad($line->products()->where('published', true)->count(), 2, '0', STR_PAD_LEFT) }}</span>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
 
-        <div class="grp">
-            <h4>Typ produktu</h4>
-            @foreach($typeLabels as $typeSlug => $typeLabel)
-                @if(($typeCounts[$typeSlug] ?? 0) > 0)
-                    <a href="{{ $toggleUrl('type', $typeSlug) }}" class="opt {{ $activeType === $typeSlug ? 'on' : '' }}" style="text-decoration:none;color:inherit;display:flex">
-                        <div class="box"></div>
-                        <div class="lab">{{ $typeLabel }}</div>
-                        <span class="cnt">{{ str_pad($typeCounts[$typeSlug], 2, '0', STR_PAD_LEFT) }}</span>
-                    </a>
-                @endif
-            @endforeach
+            <div class="grp {{ $activeType ? 'open' : '' }}">
+                <h4><button type="button" class="grp-head" data-grp-toggle aria-expanded="{{ $activeType ? 'true' : 'false' }}">Typ produktu <span class="chev" aria-hidden="true"></span></button></h4>
+                <div class="grp-body">
+                    @foreach($typeLabels as $typeSlug => $typeLabel)
+                        @if(($typeCounts[$typeSlug] ?? 0) > 0)
+                            <a href="{{ $toggleUrl('type', $typeSlug) }}" class="opt {{ $activeType === $typeSlug ? 'on' : '' }}" style="text-decoration:none;color:inherit;display:flex">
+                                <div class="box"></div>
+                                <div class="lab">{{ $typeLabel }}</div>
+                                <span class="cnt">{{ str_pad($typeCounts[$typeSlug], 2, '0', STR_PAD_LEFT) }}</span>
+                            </a>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
         </div>
     </aside>
 
@@ -106,5 +116,26 @@
         @endif
     </div>
 </div>
+
+@push('scripts')
+<script>
+(function () {
+    var filToggle = document.querySelector('[data-fil-toggle]');
+    if (filToggle) {
+        filToggle.addEventListener('click', function () {
+            var open = this.closest('.shop-fil').classList.toggle('open');
+            this.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+    }
+    document.querySelectorAll('[data-grp-toggle]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            if (!window.matchMedia('(max-width: 1100px)').matches) return;
+            var open = this.closest('.grp').classList.toggle('open');
+            this.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+    });
+})();
+</script>
+@endpush
 
 @endsection
