@@ -46,23 +46,27 @@ class ShopController extends Controller
             $query->where('line_id', $activeLineModel->id);
         }
 
-        $products = $query->get();
+        $products = Product::dedupeSizeVariants($query->get());
 
         if ($activeType) {
             $products = $products->filter(fn ($p) => $p->type === $activeType)->values();
         }
 
-        $allProducts = Product::where('published', true)
-            ->when(!$isB2b, fn ($q) => $q->where('b2b_only', false))
-            ->get();
+        $allProducts = Product::dedupeSizeVariants(
+            Product::where('published', true)
+                ->when(!$isB2b, fn ($q) => $q->where('b2b_only', false))
+                ->orderBy('sort_order')
+                ->get()
+        );
         $totalProducts = $allProducts->count();
 
         $typeCounts = $allProducts->groupBy(fn ($p) => $p->type)->map->count();
+        $lineCounts = $allProducts->groupBy('line_id')->map->count();
 
         return view('pages.shop', compact(
             'lines', 'products', 'totalProducts',
             'activeLine', 'activeLineModel', 'activeType', 'activeSort',
-            'typeCounts'
+            'typeCounts', 'lineCounts'
         ));
     }
 }

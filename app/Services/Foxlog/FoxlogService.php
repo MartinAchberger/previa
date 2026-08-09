@@ -110,8 +110,16 @@ class FoxlogService
         $items = [];
         foreach ($order->items as $item) {
             $product = Product::withoutGlobalScopes()->find($item->product_id);
+            $sku = $product?->sku ?: $item->product_code;
+            // Shade lines store the shade code in product_code — every single
+            // shade is its own warehouse item, so it gets a per-shade SKU
+            // derived as "<product sku>-<shade code>".
+            if ($product && $item->product_code !== $product->code) {
+                $shade = $product->findShade($item->product_code);
+                $sku = $shade['sku'] ?? (($product->sku ?: $product->code) . '-' . $item->product_code);
+            }
             $items[] = array_filter([
-                'sku'      => $product?->sku ?: $item->product_code,
+                'sku'      => $sku,
                 'name'     => $item->product_name,
                 'quantity' => (int) $item->qty,
             ], fn ($v) => $v !== null && $v !== '');

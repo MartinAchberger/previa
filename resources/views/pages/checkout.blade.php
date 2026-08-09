@@ -160,7 +160,7 @@
                 <h3>Doprava</h3>
                 @if (!empty($packetaKey))
                 <div class="ck-method">
-                    <input type="radio" id="dv-zas" name="delivery_choice" value="zasielkovna">
+                    <input type="radio" id="dv-zas" name="delivery_choice" value="zasielkovna" @checked(old('delivery_choice') === 'zasielkovna')>
                     <label for="dv-zas">
                         <strong>Zásielkovňa – výdajné miesto</strong>
                         <small>Vyzdvihnutie na výdajnom mieste. Zadarmo od €60.</small>
@@ -168,14 +168,14 @@
                 </div>
                 @endif
                 <div class="ck-method">
-                    <input type="radio" id="dv-gls" name="delivery_choice" value="gls" checked>
+                    <input type="radio" id="dv-gls" name="delivery_choice" value="gls" @checked(old('delivery_choice', 'gls') === 'gls')>
                     <label for="dv-gls">
                         <strong>GLS – doručenie na adresu</strong>
                         <small>Doručenie kuriérom GLS v rámci SR. Zadarmo od €60.</small>
                     </label>
                 </div>
                 <div class="ck-method">
-                    <input type="radio" id="dv-dpd" name="delivery_choice" value="dpd">
+                    <input type="radio" id="dv-dpd" name="delivery_choice" value="dpd" @checked(old('delivery_choice') === 'dpd')>
                     <label for="dv-dpd">
                         <strong>DPD – doručenie na adresu</strong>
                         <small>Doručenie kuriérom DPD v rámci SR. Zadarmo od €60.</small>
@@ -197,14 +197,14 @@
             <div class="ck-grp">
                 <h3>Platba</h3>
                 <div class="ck-method">
-                    <input type="radio" id="pay-cod" name="payment_method" value="cod" checked>
+                    <input type="radio" id="pay-cod" name="payment_method" value="cod" @checked(old('payment_method', 'cod') === 'cod')>
                     <label for="pay-cod">
                         <strong>Dobierka</strong>
                         <small>Platba pri prevzatí kuriérovi. Žiadny príplatok.</small>
                     </label>
                 </div>
                 <div class="ck-method">
-                    <input type="radio" id="pay-card" name="payment_method" value="card">
+                    <input type="radio" id="pay-card" name="payment_method" value="card" @checked(old('payment_method') === 'card')>
                     <label for="pay-card">
                         <strong>Online platba kartou</strong>
                         <small>Rýchla a bezpečná platba kartou alebo cez Apple Pay.</small>
@@ -213,7 +213,7 @@
                 </div>
                 @if (!empty($canPayByInvoice))
                 <div class="ck-method">
-                    <input type="radio" id="pay-transfer" name="payment_method" value="transfer">
+                    <input type="radio" id="pay-transfer" name="payment_method" value="transfer" @checked(old('payment_method') === 'transfer')>
                     <label for="pay-transfer">
                         <strong>Platba na faktúru (prevodom)</strong>
                         <small>Pre salóny. Vystavíme faktúru so splatnosťou (14 dní) a QR kódom. Objednávku odošleme a faktúru uhradíte prevodom do splatnosti.</small>

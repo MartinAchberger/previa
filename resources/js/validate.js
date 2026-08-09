@@ -67,7 +67,15 @@
         ['input', 'change'].forEach(function (evt) {
             form.addEventListener(evt, function (e) {
                 var el = e.target;
-                if (el.classList && el.classList.contains('is-invalid') && el.checkValidity()) clearError(el);
+                if (!el.classList) return;
+                // Radio-group errors sit on the group's first invalid element —
+                // picking ANY option in the group must clear it.
+                if (el.type === 'radio' && el.name) {
+                    var marked = form.querySelector('input[type="radio"].is-invalid[name="' + (window.CSS && CSS.escape ? CSS.escape(el.name) : el.name) + '"]');
+                    if (marked && marked.checkValidity()) clearError(marked);
+                    return;
+                }
+                if (el.classList.contains('is-invalid') && el.checkValidity()) clearError(el);
             }, true);
         });
     });

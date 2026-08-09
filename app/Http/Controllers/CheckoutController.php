@@ -167,15 +167,16 @@ class CheckoutController extends Controller
         $lines = [];
         $subtotal = 0;
         $subtotalBeforeDiscount = 0;
-        $dropped = 0;
+        $dropped = [];
         foreach ($parsed as $item) {
             $product = $products->get($item['product_id']);
-            if (!$product) { $dropped++; continue; }
+            if (!$product) { $dropped[] = 'položka č. ' . $item['product_id']; continue; }
+            if ($product->isOutOfStock()) { $dropped[] = $product->name; continue; }
 
             $shade = null;
             if ($item['shade_code']) {
                 $shade = $product->findShade($item['shade_code']);
-                if (!$shade) { $dropped++; continue; }
+                if (!$shade) { $dropped[] = $product->name . ' · ' . $item['shade_code']; continue; }
             }
 
             // Product sale discount applies to everyone (shade price or base price),
@@ -204,8 +205,8 @@ class CheckoutController extends Controller
         // Some cart items no longer exist / aren't available (e.g. unpublished, or a
         // professional-only product left in a guest's cart). Don't silently charge a
         // different order than the customer saw — ask them to refresh the cart.
-        if ($dropped > 0) {
-            return back()->withErrors(['items' => 'Niektoré položky v košíku už nie sú dostupné. Skontrolujte prosím košík a skúste znova.'])->withInput();
+        if (!empty($dropped)) {
+            return back()->withErrors(['items' => 'Tieto položky už nie sú dostupné: ' . implode(', ', $dropped) . '. Odstráňte ich prosím z košíka a skúste znova.'])->withInput();
         }
 
         $subtotalBeforeDiscount = round($subtotalBeforeDiscount, 2);

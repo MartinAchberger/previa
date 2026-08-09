@@ -52,7 +52,7 @@
                         <a href="{{ $toggleUrl('line', $line->slug) }}" class="opt {{ $activeLine === $line->slug ? 'on' : '' }}" style="text-decoration:none;color:inherit;display:flex">
                             <div class="box"></div>
                             <div class="lab">{{ $line->name }}</div>
-                            <span class="cnt">{{ str_pad($line->products()->where('published', true)->count(), 2, '0', STR_PAD_LEFT) }}</span>
+                            <span class="cnt">{{ str_pad($lineCounts[$line->id] ?? 0, 2, '0', STR_PAD_LEFT) }}</span>
                         </a>
                     @endforeach
                 </div>

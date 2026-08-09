@@ -214,8 +214,8 @@
                         <span class="sep">·</span>
                         <strong data-shade-tot>€0,00</strong>
                     </div>
-                    <button type="button" class="btn" data-shade-add disabled>
-                        Pridať do košíka <span aria-hidden="true">→</span>
+                    <button type="button" class="btn" data-shade-add disabled @if($product->isOutOfStock()) data-oos @endif>
+                        @if ($product->isOutOfStock()) Vypredané @else Pridať do košíka <span aria-hidden="true">→</span> @endif
                     </button>
                 </div>
             </div>
@@ -261,7 +261,7 @@
                     countEl.textContent = count;
                     totEl.textContent = fmt(tot);
                     foot.classList.toggle('on', count > 0);
-                    addBtn.disabled = count === 0;
+                    addBtn.disabled = count === 0 || addBtn.hasAttribute('data-oos');
                 }
                 recompute();
 
@@ -372,9 +372,13 @@
                     <div class="v" id="pdp-qty-val">1</div>
                     <button type="button" id="pdp-qty-inc">+</button>
                 </div>
-                <button type="button" class="btn" id="pdp-add" data-product="{{ json_encode($payloadPdp, JSON_UNESCAPED_UNICODE) }}">
-                    Pridať do košíka <span aria-hidden="true">→</span>
-                </button>
+                @if ($product->isOutOfStock())
+                    <button type="button" class="btn" disabled>Vypredané</button>
+                @else
+                    <button type="button" class="btn" id="pdp-add" data-product="{{ json_encode($payloadPdp, JSON_UNESCAPED_UNICODE) }}">
+                        Pridať do košíka <span aria-hidden="true">→</span>
+                    </button>
+                @endif
             </div>
             @push('scripts')
             <script>

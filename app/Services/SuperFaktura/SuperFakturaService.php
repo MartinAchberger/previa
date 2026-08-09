@@ -270,6 +270,17 @@ class SuperFakturaService
         };
     }
 
+    /** Current status of the order's regular invoice in SF (InvoiceStatus enum value), null if unknown. */
+    public function fetchInvoiceStatus(Order $order): ?int
+    {
+        if (!$order->invoice_sf_id) {
+            return null;
+        }
+        $response = $this->api->invoices->getById((int) $order->invoice_sf_id);
+        $invoice = $this->extractInvoice($response->data);
+        return isset($invoice['status']) ? (int) $invoice['status'] : null;
+    }
+
     private function extractInvoice(array $data): array
     {
         if (isset($data['data']['Invoice']) && is_array($data['data']['Invoice'])) {

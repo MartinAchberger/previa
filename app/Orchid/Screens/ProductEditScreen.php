@@ -96,7 +96,7 @@ class ProductEditScreen extends Screen
                 Matrix::make('product.shades')
                     ->title('Odtiene (pre farbiace produkty)')
                     ->help('Kód = napr. 9.42 alebo Pearl. Názov = popis odtieňa. Skupina (voliteľné) = názov rodiny (napr. NATURAL, ASH, GOLDEN). Ak je vyplnená pri aspoň jednom odtieni, zoznam sa zoskupuje po rodinách; inak po číselnom leveli (1-10). Farba = HEX hodnota swatchu (napr. #caa07a). Cena (voliteľné) = ak má odtieň inú cenu než produkt.')
-                    ->columns(['code', 'name', 'group', 'color', 'price'])
+                    ->columns(['code', 'name', 'group', 'color', 'price', 'sku'])
                     ->fields([
                         'color' => Input::make()->type('color'),
                     ])

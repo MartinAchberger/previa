@@ -27,7 +27,9 @@
                     <div>@include('partials.bottle', ['kind' => $p->kind, 'tone' => $p->tone, 'cap' => $p->cap ?: $p->tone, 'sub' => $p->complex, 'n' => $p->code, 'label' => 'PREVIA'])</div>
                 </div>
             @endif
-            @if($p->badge)
+            @if($p->isOutOfStock())
+                <div class="badge badge--soldout">Vypredané</div>
+            @elseif($p->badge)
                 <div class="badge">{{ $p->badge }}</div>
             @endif
             <div class="no">n° {{ $p->code }}</div>
@@ -45,7 +47,11 @@
             @endif
         </div>
     </a>
-    @if ($cardHasShades)
+    @if ($p->isOutOfStock())
+        <button type="button" class="card-cta" disabled>
+            <span>Vypredané</span>
+        </button>
+    @elseif ($cardHasShades)
         <a href="{{ route('product.show', $p->slug) }}" class="card-cta">
             <span>Vybrať odtieň</span><span aria-hidden="true">→</span>
         </a>

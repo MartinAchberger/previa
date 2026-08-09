@@ -114,6 +114,22 @@ class FoxlogWebhookController extends Controller
                     Log::error('Shipped email failed', ['order' => $order->order_number, 'error' => $e->getMessage()]);
                 }
             }
+
+            // COD delivered = money collected by the courier → record the payment
+            // and issue the paid invoice (same flow the admin runs manually).
+            if (($fill['status'] ?? null) === 'delivered' && $order->payment_method === 'cod') {
+                $claimed = Order::whereKey($order->id)
+                    ->where('payment_status', 'unpaid')
+                    ->update(['payment_status' => 'paid', 'paid_at' => now()]);
+                if ($claimed) {
+                    try {
+                        app(\App\Services\OrderPaidProcessor::class)->process($order->refresh());
+                    } catch (Throwable $e) {
+                        Log::error('COD delivered → invoice failed', ['order' => $order->order_number, 'error' => $e->getMessage()]);
+                        app(\App\Services\SuperFaktura\SuperFakturaService::class)->recordError($order, $e);
+                    }
+                }
+            }
         }
 
         return response()->json(['updated' => $updated, 'unknown_references' => $unknown]);

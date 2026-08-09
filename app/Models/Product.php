@@ -142,6 +142,28 @@ class Product extends Model
         return '€' . number_format($this->price_net, 2, ',', ' ');
     }
 
+    /**
+     * Listing dedup: size variants of one product (shared variant_group) show as
+     * a single card — the classic size (lowest sort_order). The other sizes stay
+     * reachable via the PDP size switcher.
+     */
+    public static function dedupeSizeVariants(\Illuminate\Support\Collection $products): \Illuminate\Support\Collection
+    {
+        $primary = $products->filter(fn ($p) => $p->variant_group)
+            ->groupBy('variant_group')
+            ->map(fn ($group) => $group->sortBy([['sort_order', 'asc'], ['id', 'asc']])->first()->id);
+
+        return $products
+            ->filter(fn ($p) => !$p->variant_group || $primary[$p->variant_group] === $p->id)
+            ->values();
+    }
+
+    /** Stock is tracked only when the Foxlog sync filled it — null means "not tracked, sell freely". */
+    public function isOutOfStock(): bool
+    {
+        return $this->stock !== null && (int) $this->stock <= 0;
+    }
+
     public function getImageUrlAttribute(): ?string
     {
         if (!$this->image_path) {

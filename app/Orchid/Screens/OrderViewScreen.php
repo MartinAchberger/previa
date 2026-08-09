@@ -213,21 +213,7 @@ class OrderViewScreen extends Screen
         // orders are already invoiced from Stripe, so we only record the payment.
         if ($newPaymentStatus === 'paid' && $oldPaymentStatus !== 'paid') {
             try {
-                if ($order->hasProforma() && !$order->hasInvoice()) {
-                    $sf->convertProformaToInvoice($order);
-                    $sf->markInvoicePaid($order->refresh());
-                    $this->dispatchInvoiceEmail($order->refresh());
-                    Toast::info('Vystavená ostrá faktúra, zaznamenaná platba a odoslaný e-mail zákazníkovi.');
-                } elseif ($order->hasInvoice()) {
-                    $sf->markInvoicePaid($order->refresh());
-                    Toast::info('Platba zaznamenaná v SuperFaktúre.');
-                } else {
-                    // No document yet (typicky dobierka) → vystaviť faktúru teraz.
-                    $sf->issueForOrder($order);
-                    $sf->markInvoicePaid($order->refresh());
-                    $this->dispatchInvoiceEmail($order->refresh());
-                    Toast::info('Vystavená faktúra, zaznamenaná platba a odoslaný e-mail zákazníkovi.');
-                }
+                Toast::info(app(\App\Services\OrderPaidProcessor::class)->process($order));
             } catch (Throwable $e) {
                 Log::error('SF on-paid failed', ['order' => $order->order_number, 'error' => $e->getMessage()]);
                 $sf->recordError($order, $e);
