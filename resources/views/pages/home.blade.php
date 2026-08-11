@@ -115,7 +115,7 @@
         </div>
     </div>
     <div class="cta-quiz-r cta-quiz-r--photo">
-        <img src="{{ asset('images/redesign/texture-oil.jpg') }}" alt="Diagnostika vlasov PREVIA" loading="lazy">
+        <img src="{{ asset('images/redesign/diagnostika.jpg') }}" alt="PREVIA Regenerating - produkty pre zdravú pokožku hlavy" loading="lazy">
     </div>
 </section>
 
