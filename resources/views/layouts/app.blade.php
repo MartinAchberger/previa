@@ -22,7 +22,6 @@
 </head>
 <body>
 
-    @include('partials.bar')
     @include('partials.nav', ['active' => $active ?? null])
 
     @yield('content')

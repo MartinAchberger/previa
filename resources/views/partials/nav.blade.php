@@ -19,7 +19,7 @@
             <a href="{{ route('b2b.logout') }}" class="b2b" onclick="event.preventDefault();document.getElementById('b2b-logout').submit();" style="text-decoration:none">Odhlásiť</a>
             <form id="b2b-logout" action="{{ route('b2b.logout') }}" method="POST" style="display:none">@csrf</form>
         @else
-            <a href="{{ route('b2b.login') }}" class="b2b" style="text-decoration:none">Per saloni</a>
+            <a href="{{ route('b2b.login') }}" class="b2b" style="text-decoration:none">Pre salóny</a>
         @endif
     </div>
 </header>
