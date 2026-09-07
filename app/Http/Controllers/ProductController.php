@@ -35,13 +35,28 @@ class ProductController extends Controller
                 ->get()
             : new Collection();
 
-        $crossSell = Product::query()
+        // "Doplňuje sa s týmito": the rest of the product's own routine first
+        // (same collection, regular sizes), topped up with random picks.
+        $visible = fn ($q) => $q
             ->where('published', true)
             ->when(!$isB2b, fn ($q) => $q->where('b2b_only', false))
             ->where('id', '!=', $product->id)
-            ->inRandomOrder()
-            ->limit(4)
-            ->get();
+            ->when($product->variant_group, fn ($q) => $q->where(fn ($q) => $q
+                ->whereNull('variant_group')
+                ->orWhere('variant_group', '!=', $product->variant_group)));
+
+        $crossSell = $product->line_id
+            ? Product::dedupeSizeVariants(
+                Product::query()->tap($visible)->inLine($product->line_id)->orderBy('sort_order')->get()
+            )->take(4)
+            : new Collection();
+
+        if ($crossSell->count() < 4) {
+            $fill = Product::dedupeSizeVariants(
+                Product::query()->tap($visible)->whereNotIn('id', $crossSell->pluck('id'))->inRandomOrder()->get()
+            )->take(4 - $crossSell->count());
+            $crossSell = $crossSell->concat($fill);
+        }
 
         return view('pages.pdp', compact('product', 'variants', 'crossSell'));
     }

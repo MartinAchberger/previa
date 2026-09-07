@@ -12,12 +12,27 @@ class HomeController extends Controller
     {
         $isB2b = auth('b2b')->check();
 
+        // "Začnite svoju cestu" = curated picks (admin: "Výber na úvodnej stránke"),
+        // topped up with the first regular-size products if fewer than 4 are flagged.
         $topProducts = Product::query()
             ->where('published', true)
+            ->where('featured', true)
             ->when(!$isB2b, fn ($q) => $q->where('b2b_only', false))
-            ->orderBy('price', 'desc')
+            ->orderBy('sort_order')
             ->limit(4)
             ->get();
+
+        if ($topProducts->count() < 4) {
+            $fill = Product::dedupeSizeVariants(
+                Product::query()
+                    ->where('published', true)
+                    ->when(!$isB2b, fn ($q) => $q->where('b2b_only', false))
+                    ->whereNotIn('id', $topProducts->pluck('id'))
+                    ->orderBy('sort_order')
+                    ->get()
+            )->take(4 - $topProducts->count());
+            $topProducts = $topProducts->concat($fill);
+        }
 
         // "Naše línie" na homepage = len vlasové línie (bez profi, doplnkov, sun a leave-in)
         $lines = ProductLine::query()

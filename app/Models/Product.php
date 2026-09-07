@@ -22,10 +22,10 @@ class Product extends Model
     }
 
     protected $fillable = [
-        'line_id', 'code', 'sku', 'stock', 'variant_group', 'slug', 'name', 'subtitle', 'line_label',
+        'line_id', 'extra_line_ids', 'code', 'sku', 'stock', 'variant_group', 'slug', 'name', 'subtitle', 'line_label',
         'complex', 'volume', 'price', 'discount_percent', 'badge', 'kind', 'tone', 'cap',
-        'image_path', 'description', 'ingredients', 'results', 'compatibility', 'protocol',
-        'fragrance', 'shades', 'sort_order', 'published', 'b2b_only',
+        'image_path', 'description', 'for_whom', 'expect', 'usage',
+        'fragrance', 'shades', 'sort_order', 'published', 'featured', 'b2b_only',
     ];
 
     protected $casts = [
@@ -33,15 +33,46 @@ class Product extends Model
         'discount_percent' => 'integer',
         'stock' => 'integer',
         'published' => 'boolean',
+        'featured' => 'boolean',
         'b2b_only' => 'boolean',
         'sort_order' => 'integer',
-        'ingredients' => 'array',
-        'results' => 'array',
-        'compatibility' => 'array',
-        'protocol' => 'array',
+        'extra_line_ids' => 'array',
+        'for_whom' => 'array',
+        'expect' => 'array',
         'fragrance' => 'array',
         'shades' => 'array',
     ];
+
+    /** Extra collections are stored as a clean list of integer line ids (never the primary line). */
+    public function setExtraLineIdsAttribute($value): void
+    {
+        $ids = collect(is_array($value) ? $value : (is_string($value) ? json_decode($value, true) : []))
+            ->map(fn ($v) => (int) $v)
+            ->filter(fn ($v) => $v > 0 && $v !== (int) $this->line_id)
+            ->unique()
+            ->values()
+            ->all();
+
+        $this->attributes['extra_line_ids'] = $ids ? json_encode($ids) : null;
+    }
+
+    /** Every collection the product is listed in: the primary line + extra lines. */
+    public function lineIds(): array
+    {
+        $ids = array_map('intval', $this->extra_line_ids ?? []);
+        if ($this->line_id) {
+            array_unshift($ids, (int) $this->line_id);
+        }
+        return array_values(array_unique($ids));
+    }
+
+    /** Products listed in a collection — as their primary line or as an extra one. */
+    public function scopeInLine(\Illuminate\Database\Eloquent\Builder $query, int $lineId): \Illuminate\Database\Eloquent\Builder
+    {
+        return $query->where(fn ($q) => $q
+            ->where('line_id', $lineId)
+            ->orWhereJsonContains('extra_line_ids', $lineId));
+    }
 
     public function hasShades(): bool
     {
@@ -144,18 +175,43 @@ class Product extends Model
 
     /**
      * Listing dedup: size variants of one product (shared variant_group) show as
-     * a single card — the classic size (lowest sort_order). The other sizes stay
-     * reachable via the PDP size switcher.
+     * a single card — the classic retail size (see defaultSizeVariant). The other
+     * sizes stay reachable via the PDP size switcher.
      */
     public static function dedupeSizeVariants(\Illuminate\Support\Collection $products): \Illuminate\Support\Collection
     {
         $primary = $products->filter(fn ($p) => $p->variant_group)
             ->groupBy('variant_group')
-            ->map(fn ($group) => $group->sortBy([['sort_order', 'asc'], ['id', 'asc']])->first()->id);
+            ->map(fn ($group) => self::defaultSizeVariant($group)->id);
 
         return $products
             ->filter(fn ($p) => !$p->variant_group || $primary[$p->variant_group] === $p->id)
             ->values();
+    }
+
+    /**
+     * The size shown in listings (cards, homepage, quiz): the largest size that is
+     * not salon-only — i.e. the regular 340 ml bottle, not the 100 ml travel size
+     * and not the 1000 ml salon pack. When every size is salon-only, the middle one.
+     */
+    public static function defaultSizeVariant(\Illuminate\Support\Collection $group): self
+    {
+        $sorted = $group
+            ->sort(fn ($a, $b) => (self::volumeMl($a) <=> self::volumeMl($b)) ?: ((float) $a->price <=> (float) $b->price))
+            ->values();
+
+        $retail = $sorted->filter(fn ($p) => !$p->b2b_only);
+        if ($retail->isNotEmpty()) {
+            return $retail->last();
+        }
+
+        return $sorted->get(intdiv($sorted->count() - 1, 2));
+    }
+
+    /** Millilitres for a single "<n> ml" volume; 0 for multipacks, grams, sets. */
+    public static function volumeMl(self $product): int
+    {
+        return preg_match('/^\s*(\d+)\s*ml\s*$/iu', (string) $product->volume, $m) ? (int) $m[1] : 0;
     }
 
     /** Stock is tracked only when the Foxlog sync filled it — null means "not tracked, sell freely". */

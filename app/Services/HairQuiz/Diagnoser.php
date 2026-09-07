@@ -89,7 +89,10 @@ class Diagnoser
 
     private function buildRitual(ProductLine $line): Collection
     {
-        $products = $line->products()->where('published', true)->orderBy('sort_order')->get();
+        // Regular sizes only (no 100 ml travel / 1000 ml salon duplicates), incl. products cross-listed in the line.
+        $products = Product::dedupeSizeVariants(
+            Product::query()->inLine($line->id)->where('published', true)->orderBy('sort_order')->get()
+        );
 
         $picked = collect()
             ->push($products->first(fn ($p) => $p->type === 'sampon'))
@@ -106,11 +109,9 @@ class Diagnoser
         // Doplň stylingový produkt do rituálu - z línie Styling and Basics (finálny krok).
         $styleLine = ProductLine::where('slug', 'styling-and-basics')->first();
         $styling = $styleLine
-            ? $styleLine->products()
-                ->where('published', true)
-                ->orderBy('sort_order')
-                ->get()
-                ->first(fn ($p) => $p->type === 'styling')
+            ? Product::dedupeSizeVariants(
+                $styleLine->products()->where('published', true)->orderBy('sort_order')->get()
+            )->first(fn ($p) => $p->type === 'styling')
             : null;
         if ($styling && !$picked->contains('id', $styling->id)) {
             $picked = $picked->push($styling)->values();

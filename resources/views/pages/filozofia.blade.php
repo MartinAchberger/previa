@@ -32,15 +32,12 @@
     </div>
 </section>
 
-<section class="pure">
-    <div class="pure-head">
-        <div class="eyebrow center">04 — Esencia</div>
-        <h2 class="h2">Krása začína <em>rovnováhou.</em></h2>
-    </div>
-    <div class="pure-grid" style="grid-template-columns:1fr">
-        <div class="pure-block" style="text-align:center">
-            <p class="pure-lead" style="max-width:640px;margin-left:auto;margin-right:auto">PREVIA spája prírodu, vedu a profesionálnu starostlivosť do jedného celku. Výsledkom sú zdravé vlasy, ktoré nielen dobre vyzerajú, ale sa tak aj cítia.</p>
-        </div>
+<section class="j-feat">
+    <div class="ph" style="background-image:url('{{ asset('images/redesign/filozofia4.jpg') }}')"></div>
+    <div class="body">
+        <div class="meta">04 — Esencia</div>
+        <h2>Krása začína<br><em>rovnováhou.</em></h2>
+        <p>PREVIA spája prírodu, vedu a profesionálnu starostlivosť do jedného celku. Výsledkom sú zdravé vlasy, ktoré nielen dobre vyzerajú, ale sa tak aj cítia.</p>
     </div>
 </section>
 

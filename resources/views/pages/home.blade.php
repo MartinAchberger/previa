@@ -4,10 +4,6 @@
 
 @section('content')
 
-@php
-    $featured = $heroProduct ?? $topProducts->first();
-@endphp
-
 <section class="hero">
     <div class="hero-l">
         <div class="eyebrow">Profesionálna starostlivosť o vlasy · Made in Italy</div>
@@ -24,13 +20,7 @@
         </div>
     </div>
     <div class="hero-r hero-r--photo">
-        <img src="{{ asset('images/redesign/hero.jpg') }}" alt="PREVIA - profesionálna vlasová kozmetika" loading="eager">
-        @if($featured)
-            <div class="hero-callout">
-                <div class="meta">Novinka · {{ now()->format('m / y') }}</div>
-                <div class="name">{{ $featured->name }}</div>
-            </div>
-        @endif
+        <img src="{{ asset('images/redesign/hero-products.jpg') }}" alt="PREVIA - profesionálna vlasová kozmetika" loading="eager">
     </div>
 </section>
 

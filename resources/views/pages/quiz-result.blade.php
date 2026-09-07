@@ -9,6 +9,9 @@
         <div class="eyebrow">Diagnostika · Odporúčanie</div>
         <h1>Pre tvoje vlasy<br><em>{{ $line?->name ?? 'rutina' }}.</em></h1>
         @if ($line)
+            @if ($line->eyebrow)
+                <div class="quiz-line-eyebrow">{{ $line->eyebrow }}</div>
+            @endif
             <p class="lede">{{ $line->description }}</p>
         @endif
         <p class="quiz-rationale">{{ $rationale }}</p>

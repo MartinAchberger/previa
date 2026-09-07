@@ -43,7 +43,7 @@ class ShopController extends Controller
 
         $activeLineModel = $activeLine ? $allLines->firstWhere('slug', $activeLine) : null;
         if ($activeLineModel) {
-            $query->where('line_id', $activeLineModel->id);
+            $query->inLine($activeLineModel->id);
         }
 
         $products = Product::dedupeSizeVariants($query->get());
@@ -61,7 +61,13 @@ class ShopController extends Controller
         $totalProducts = $allProducts->count();
 
         $typeCounts = $allProducts->groupBy(fn ($p) => $p->type)->map->count();
-        $lineCounts = $allProducts->groupBy('line_id')->map->count();
+        // A product counts towards its primary line and every extra collection it is listed in.
+        $lineCounts = [];
+        foreach ($allProducts as $p) {
+            foreach ($p->lineIds() as $id) {
+                $lineCounts[$id] = ($lineCounts[$id] ?? 0) + 1;
+            }
+        }
 
         return view('pages.shop', compact(
             'lines', 'products', 'totalProducts',

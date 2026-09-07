@@ -21,7 +21,7 @@
     <a href="{{ route('product.show', $p->slug) }}" class="card">
         <div class="ph">
             @if($p->image_url)
-                <img src="{{ $p->image_url }}" alt="{{ $p->name }}" style="width:100%;height:100%;object-fit:contain;display:block;padding:12%;box-sizing:border-box">
+                <img src="{{ $p->image_url }}" alt="{{ $p->name }}" style="width:100%;height:100%;object-fit:contain;display:block;padding:7%;box-sizing:border-box">
             @else
                 <div class="b-wrap">
                     <div>@include('partials.bottle', ['kind' => $p->kind, 'tone' => $p->tone, 'cap' => $p->cap ?: $p->tone, 'sub' => $p->complex, 'n' => $p->code, 'label' => 'PREVIA'])</div>

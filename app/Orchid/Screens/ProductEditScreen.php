@@ -68,6 +68,12 @@ class ProductEditScreen extends Screen
                     ->title('Línia')
                     ->fromModel(ProductLine::class, 'name')
                     ->empty('- bez priradenia -', ''),
+                Select::make('product.extra_line_ids')
+                    ->title('Ďalšie kolekcie (voliteľné)')
+                    ->fromModel(ProductLine::class, 'name')
+                    ->multiple()
+                    ->value($this->product->extra_line_ids ?? [])
+                    ->help('Produkt sa v eshope zobrazí aj pri týchto kolekciách (napr. Scalp Peeling v Dry Dandruff aj Calming). Hlavná línia zostáva tá vyššie.'),
                 Input::make('product.name')->title('Názov')->required(),
                 Input::make('product.subtitle')->title('Podtitul')->help('Slovenský preklad / krátky popis'),
                 Input::make('product.line_label')->title('Štítok línie')->required()->help('napr. "Pre oslabené vlasy"'),
@@ -91,7 +97,18 @@ class ProductEditScreen extends Screen
                     ->help('Nahraj fotku produktu. Ak nenahraješ, použije sa generovaný SVG obal.')
                     ->width(800)
                     ->height(1000),
-                TextArea::make('product.description')->title('Popis (PDP)')->rows(4),
+                TextArea::make('product.description')->title('O produkte')->rows(4)->help('Krátky popis pod cenou. Odseky oddeľ prázdnym riadkom.'),
+                TextArea::make('for_whom_text')
+                    ->title('Pre koho je')
+                    ->rows(5)
+                    ->value(implode("\n", $this->product->for_whom ?? []))
+                    ->help('Jedna položka na riadok – zobrazí sa ako odrážky.'),
+                TextArea::make('expect_text')
+                    ->title('Čo očakávať')
+                    ->rows(5)
+                    ->value(implode("\n", $this->product->expect ?? []))
+                    ->help('Jedna položka na riadok – zobrazí sa ako odrážky.'),
+                TextArea::make('product.usage')->title('Použitie')->rows(5)->help('Návod na použitie (súvislý text).'),
 
                 Matrix::make('product.shades')
                     ->title('Odtiene (pre farbiace produkty)')
@@ -105,6 +122,7 @@ class ProductEditScreen extends Screen
 
                 Input::make('product.sort_order')->type('number')->title('Poradie')->value(fn () => $this->product->sort_order ?? 1),
                 CheckBox::make('product.published')->title('Publikované')->placeholder('Zobraziť na webe')->sendTrueOrFalse()->value($this->product->published ?? true),
+                CheckBox::make('product.featured')->title('Výber na úvodnej stránke')->placeholder('Zobraziť v sekcii „Začnite svoju cestu ku krajším vlasom“ (zobrazujú sa max. 4 podľa poradia)')->sendTrueOrFalse()->value($this->product->featured ?? false),
                 CheckBox::make('product.b2b_only')->title('Iba pre salóny')->placeholder('Zobraziť iba prihláseným salónom (skryť pred verejnosťou)')->sendTrueOrFalse()->value($this->product->b2b_only ?? false),
             ]),
         ];
@@ -124,6 +142,13 @@ class ProductEditScreen extends Screen
         ]);
 
         $data = $request->input('product');
+
+        // "Pre koho je" / "Čo očakávať" are edited as one item per line.
+        $linesToArray = fn ($text) => array_values(array_filter(array_map('trim', preg_split('/\R/u', (string) $text))));
+        $data['for_whom'] = $linesToArray($request->input('for_whom_text'));
+        $data['expect']   = $linesToArray($request->input('expect_text'));
+        // A deselected multi-select sends nothing at all — treat that as "no extra collections".
+        $data['extra_line_ids'] = $data['extra_line_ids'] ?? [];
 
         // Slug is auto-generated from the name (unique-suffixed on collision) —
         // admins don't manage it manually. Keep an existing slug on edit.

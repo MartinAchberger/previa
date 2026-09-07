@@ -9,8 +9,6 @@ use Illuminate\Support\Str;
 
 class ProductSeeder extends Seeder
 {
-    private const LOREM = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.';
-
     public function run(): void
     {
         // Wipe products before reseeding (keeps orders intact via nullOnDelete FK).
@@ -65,7 +63,7 @@ class ProductSeeder extends Seeder
                 ['Keeping After Color Conditioner', '1000 ml', 82, true, 'tall', 'kac-conditioner'],
                 ['Keeping After Color Treatment', '150 ml', 22, false, 'tall', 'kac-treatment'],
                 ['Keeping After Color Treatment', '1000 ml', 103, true, 'tall', 'kac-treatment'],
-                ['Keeping After Color Brand Kit Premium', '340 ml + 150 ml + 200 ml', 91, false, 'sachet', null],
+                // Keeping After Color Brand Kit Premium – vymazaný na žiadosť klienta (9/2026).
             ],
             'energising' => [
                 ['Energising Shampoo', '340 ml', 31, false, 'tall', 'energising-shampoo'],
@@ -76,8 +74,8 @@ class ProductSeeder extends Seeder
                 ['Regrowth Shampoo', '100 ml', 10, false, 'tall', 'regrowth-shampoo'],
                 ['Regrowth Shampoo', '350 ml', 31, false, 'tall', 'regrowth-shampoo'],
                 ['Regrowth Shampoo', '950 ml', 72, true, 'tall', 'regrowth-shampoo'],
-                ['Regrowth Treatment', '100 ml', 101, false, 'tall', 'regrowth-treatment'],
-                ['Regrowth Treatment', '10 × 3 ml', 58, false, 'sachet', 'regrowth-treatment'],
+                ['Hair Regrowth Treatment', '100 ml', 101, false, 'tall', 'regrowth-treatment'],
+                ['Hair Regrowth Treatment', '10 × 3 ml', 58, false, 'sachet', 'regrowth-treatment'],
                 ['Regrowth Duo Kit', '350 ml + 100 ml', 132, false, 'sachet', null],
                 ['Regrowth Brand Kit Premium', '350 ml + 100 ml', 132, false, 'sachet', null],
             ],
@@ -165,7 +163,7 @@ class ProductSeeder extends Seeder
                 ['No Gas Hairspray', '350 ml', 33, false, 'tall', null],
                 ['Style and Finish Extra Firm Mousse', '300 ml', 33, false, 'tall', null],
                 ['Basic Shampoo', '1000 ml', 61, true, 'tall', null],
-                ['Scalp Protective Oil', '200 ml', 25, false, 'tall', null],
+                ['Scalp Protective Oil', '200 ml', 25, true, 'tall', null], // len pre profesionálov
                 ['Instant Detangler', '200 ml', 25, false, 'tall', null],
             ],
             'man' => [
@@ -233,7 +231,7 @@ class ProductSeeder extends Seeder
                     'code'          => str_pad((string) $i, 3, '0', STR_PAD_LEFT),
                     'variant_group' => $variantGroup,
                     'name'          => $name,
-                    'subtitle'      => 'Lorem ipsum dolor sit amet',
+                    'subtitle'      => null,
                     'line_label'    => $line?->name ?? '',
                     'complex'       => $line?->complex ?? '—',
                     'volume'        => $volume,
@@ -242,12 +240,15 @@ class ProductSeeder extends Seeder
                     'tone'          => $tones[$lineSlug] ?? '#16140f',
                     'cap'           => $lineSlug === 'blonde' ? '#16140f' : null,
                     'image_path'    => $imagePath,
-                    'description'   => self::LOREM,
+                    'description'   => null,
                     'sort_order'    => $i,
                     'published'     => true,
                     'b2b_only'      => $b2bOnly,
                 ]);
             }
         }
+
+        // Finálne SK texty + zaradenie do ďalších kolekcií, featured výber atď.
+        $this->call(ProductContentSeeder::class);
     }
 }

@@ -7,34 +7,12 @@
 
 @php
     $line = $product->line;
-    $defaultIngredients = [
-        ['n' => '01', 'name' => trim('Aktívny komplex ' . ($product->complex ?? '')), 'small' => 'Talianske laboratórium · patent', 'pct' => '1,8 %'],
-        ['n' => '02', 'name' => 'Botanické zložky', 'small' => 'Lisované za studena · prírodné', 'pct' => '2,4 %'],
-        ['n' => '03', 'name' => 'Pantenol (B5)', 'small' => 'Preniká do kortexu', 'pct' => '1,2 %'],
-        ['n' => '04', 'name' => 'Mierny tenzid', 'small' => 'Rastlinného pôvodu, biodegradovateľné', 'pct' => '8,0 %'],
-    ];
-    $defaultResults = [
-        ['label' => 'Lesk vlasu', 'small' => 'Glossmeter Samba T2', 'value' => '+47%', 'fill' => 78],
-        ['label' => 'Pevnosť vlákna', 'small' => 'Tahový test', 'value' => '+34%', 'fill' => 62],
-        ['label' => 'Zníženie lámavosti', 'small' => 'Po 200 česaniach', 'value' => '−68%', 'fill' => 88],
-        ['label' => 'Hydratácia', 'small' => 'Spotrebiteľská anketa', 'value' => '+92%', 'fill' => 94],
-    ];
-    $defaultCompat = [
-        ['ok' => true,  'name' => 'Po blondovaní / odfarbovaní', 'small' => 'Obnova proteínovej štruktúry', 'value' => 'áno'],
-        ['ok' => true,  'name' => 'Po keratínovom narovnávaní', 'small' => 'Predĺži životnosť úpravy', 'value' => 'áno'],
-        ['ok' => true,  'name' => 'Termické poškodenie', 'small' => 'Kulma, žehlička, sušič', 'value' => 'áno'],
-        ['ok' => false, 'name' => 'Pre veľmi mastné vlasy', 'small' => 'Skús detoxikačnú líniu', 'value' => 'nie'],
-    ];
-    $defaultProtocol = [
-        ['step' => 'krok 01', 'title' => 'Predumývanie', 'desc' => 'Pred aplikáciou - detoxikačný šampón raz týždenne pre odstránenie nánosov.'],
-        ['step' => 'krok 02', 'title' => 'Aplikácia',    'desc' => 'Veľkosť eura na mokré vlasy. Masírujte 60 sekúnd v pokožke hlavy.'],
-        ['step' => 'krok 03', 'title' => 'Druhé umytie', 'desc' => 'Zopakujte - prvé umytie čistí, druhé pôsobí. Nechajte stáť 90 sekúnd.'],
-        ['step' => 'krok 04', 'title' => 'Po-aplikácia', 'desc' => 'Doplňte maskou alebo olejom z rovnakej línie.'],
-    ];
-    $ingredients = $product->ingredients ?: $defaultIngredients;
-    $results     = $product->results ?: $defaultResults;
-    $compatibility = $product->compatibility ?: $defaultCompat;
-    $protocol    = $product->protocol ?: $defaultProtocol;
+    // Client-supplied texts (ProductContentSeeder / admin). Sections without content are simply not rendered.
+    $forWhom  = array_values(array_filter(array_map('trim', (array) ($product->for_whom ?? []))));
+    $expect   = array_values(array_filter(array_map('trim', (array) ($product->expect ?? []))));
+    $usage    = trim((string) $product->usage);
+    $descriptionParas = array_values(array_filter(array_map('trim', preg_split('/\R{2,}/u', (string) $product->description))));
+    $detailCols = ($forWhom ? 1 : 0) + ($expect ? 1 : 0) + ($usage !== '' ? 1 : 0);
 @endphp
 
 <section class="pdp{{ ($product->hasShades() && auth('b2b')->check()) ? ' pdp--shades' : '' }}">
@@ -42,13 +20,13 @@
         <div class="crosshair"></div>
         <div class="corners"><span class="tl"></span><span class="tr"></span><span class="bl"></span><span class="br"></span></div>
         <div class="imgmeta">
-            FORMULÁCIA · {{ $product->complex ?: '-' }}<br>
-            pH · 5,4<br>
+            {{ $line?->name ?? $product->line_label }}<br>
+            Made in Italy<br>
             <strong>{{ $product->volume }}</strong>
         </div>
         <div class="b-main">
             @if($product->image_url)
-                <img src="{{ $product->image_url }}" alt="{{ $product->name }}" style="width:100%;height:100%;object-fit:contain;display:block;padding:8%;box-sizing:border-box">
+                <img src="{{ $product->image_url }}" alt="{{ $product->name }}" style="width:100%;height:100%;object-fit:contain;display:block;padding:4%;box-sizing:border-box">
             @else
                 @include('partials.bottle', ['kind' => $product->kind, 'tone' => $product->tone, 'cap' => $product->cap ?: $product->tone, 'sub' => $product->complex ?: 'Made in Italy', 'n' => $product->code, 'label' => 'PREVIA'])
             @endif
@@ -65,8 +43,11 @@
             <span class="sep">/</span>
             <span>{{ $product->name }}</span>
         </div>
-        <div class="line">- línia {{ $line?->code ?? '-' }} · {{ $line?->name ?? $product->line_label }} · {{ $line?->eyebrow ?? '' }}</div>
+        <div class="line">- línia {{ $line?->code ?? '-' }} · {{ $line?->name ?? $product->line_label }}{{ $line?->eyebrow ? ' · ' . $line->eyebrow : '' }}</div>
         <h1>{{ $product->name }}</h1>
+        @if($product->subtitle)
+            <p class="pdp-sub">{{ $product->subtitle }}</p>
+        @endif
 
         @php
             $b2bPdp = auth('b2b')->user();
@@ -412,79 +393,54 @@
     </div>
 </section>
 
-@if($product->description || $product->subtitle)
+@if($descriptionParas)
 <section class="pdp-about">
     <div class="pdp-about-l">
         <div class="line">- O produkte</div>
     </div>
     <div class="pdp-about-r">
-        <p>{{ $product->description ?: $product->subtitle }}</p>
+        @foreach($descriptionParas as $para)
+            <p>{{ $para }}</p>
+        @endforeach
     </div>
 </section>
 @endif
 
-<section class="pdp-detail">
+@if($detailCols > 0)
+<section class="pdp-detail pdp-detail--{{ $detailCols }}">
+    @if($forWhom)
     <div class="col">
-        <div class="line" style="margin-bottom:18px">- Aktívne zložky</div>
-        <h3>Formulácia <span style="color:var(--mute);font-weight:200">{{ $product->complex ?: '' }}</span></h3>
-        <p>Komplex zameraný na obnovu disulfidových väzieb v kortexe vlasu. Bez pridanej vody, parfumovaný esenciálnymi olejmi.</p>
-        <div class="ing">
-            @foreach($ingredients as $ing)
-                <div class="ing-it">
-                    <div class="n">{{ $ing['n'] }}</div>
-                    <div class="nm">{{ $ing['name'] }}<small>{{ $ing['small'] }}</small></div>
-                    <div class="pct">{{ $ing['pct'] }}</div>
-                </div>
+        <div class="line" style="margin-bottom:18px">- Pre koho je</div>
+        <h3>Vhodné <span style="color:var(--mute);font-weight:200">pre</span></h3>
+        <ul class="pdp-list">
+            @foreach($forWhom as $item)
+                <li>{{ $item }}</li>
             @endforeach
-        </div>
+        </ul>
     </div>
+    @endif
 
+    @if($expect)
     <div class="col">
-        <div class="line" style="margin-bottom:18px">- Klinický test</div>
-        <h3>Výsledky <span style="color:var(--mute);font-weight:200">po 28 dňoch</span></h3>
-        <p>124 účastníkov · dvojito zaslepené · in vitro a spotrebiteľské testovanie · Univerzita v Bologni, 2024.</p>
-        <div class="results">
-            @foreach($results as $r)
-                <div>
-                    <div class="res-it"><div class="l">{{ $r['label'] }}<small>{{ $r['small'] }}</small></div><div class="v">{{ $r['value'] }}</div></div>
-                    <div class="trial-bar"><div class="fill" style="width:{{ $r['fill'] }}%"></div></div>
-                </div>
+        <div class="line" style="margin-bottom:18px">- Čo očakávať</div>
+        <h3>Výsledok <span style="color:var(--mute);font-weight:200">pri pravidelnom používaní</span></h3>
+        <ul class="pdp-list">
+            @foreach($expect as $item)
+                <li>{{ $item }}</li>
             @endforeach
-        </div>
+        </ul>
     </div>
+    @endif
 
+    @if($usage !== '')
     <div class="col">
-        <div class="line" style="margin-bottom:18px">- Kompatibilita</div>
-        <h3>Pre koho <span style="color:var(--mute);font-weight:200">je toto?</span></h3>
-        <p>{{ $product->name }} je formulovaný pre vlasy s konkrétnym profilom.</p>
-        <div class="ing">
-            @foreach($compatibility as $c)
-                <div class="ing-it">
-                    <div class="n">{{ $c['ok'] ? '✓' : '✕' }}</div>
-                    <div class="nm">{{ $c['name'] }}<small>{{ $c['small'] }}</small></div>
-                    <div class="pct">{{ $c['value'] }}</div>
-                </div>
-            @endforeach
-        </div>
+        <div class="line" style="margin-bottom:18px">- Použitie</div>
+        <h3>Ako <span style="color:var(--mute);font-weight:200">používať</span></h3>
+        <p class="pdp-usage">{{ $usage }}</p>
     </div>
+    @endif
 </section>
-
-<section class="howto">
-    <div class="section-head" style="border-bottom:none;padding-bottom:0;margin-bottom:32px">
-        <h2 class="h2">Protokol - <em>ako používať.</em></h2>
-        @php($pc = count($protocol))
-        <div class="section-sub">{{ $pc }} {{ $pc === 1 ? 'krok' : ($pc < 5 ? 'kroky' : 'krokov') }} · ~6 min</div>
-    </div>
-    <div class="howto-grid">
-        @foreach($protocol as $step)
-            <div class="howto-step">
-                <div class="n">{{ $step['step'] }}</div>
-                <div class="ti">{{ $step['title'] }}</div>
-                <div class="ds">{{ $step['desc'] }}</div>
-            </div>
-        @endforeach
-    </div>
-</section>
+@endif
 
 <section class="compat">
     <div class="section-head">
