@@ -66,8 +66,8 @@ class ProductContentSeeder extends Seeder
             $p->forceFill(['name' => 'Hair Regrowth Treatment', 'slug' => $slug, 'image_path' => $image])->save();
         });
 
-        // Vymazať – požiadavka klienta.
-        Product::withoutGlobalScopes()->where('name', 'Keeping After Color Brand Kit Premium')->delete();
+        // Vymazať – požiadavka klienta (7. 9. KAC brand kit, 8. 9. všetky brand kity).
+        Product::withoutGlobalScopes()->where('name', 'like', '%Brand Kit Premium%')->delete();
 
         // Produkty zaradené do viacerých kolekcií (ostávajú aj vo svojej pôvodnej).
         $extra = [
@@ -1012,6 +1012,106 @@ Regrowth Shampoo 350 ml + Hair Regrowth Treatment 100 ml',
                 'jednoduchú profesionálnu aplikáciu',
             ],
             'usage'       => 'Pred farbením alebo inou chemickou službou aplikujte Scalp Protective Oil priamo na suchú vlasovú pokožku, najmä na citlivé miesta a oblasti so sklonom k podráždeniu. Jemne rozotrite končekmi prstov, aby sa produkt rovnomerne rozložil a vytvoril ochrannú bariéru medzi pokožkou a chemickým produktom. Neoplachujte a následne pokračujte plánovanou profesionálnou službou. Určený najmä na profesionálne použitie v salóne.',
+        ],
+        // Doplnené 8. 9. 2026 (WhatsApp): Taming + Hair and Scalp.
+        'Smoothing Taming Shampoo' => [
+            'subtitle'    => 'Uhladzujúci šampón pre nepoddajné a krepovité vlasy',
+            'description' => 'Jemne čistí vlasy a vlasovú pokožku a zároveň pomáha disciplinovať nepoddajné vlasové vlákno. Podporuje uhladenie, hebkosť a kontrolu krepovatenia a pripravuje vlasy na následnú uhladzujúcu starostlivosť. Ideálny pre vlasy, ktoré reagujú na vlhkosť, ťažšie sa upravujú alebo majú prirodzene hrubšiu a nepoddajnú štruktúru.',
+            'for_whom'    => [
+                'nepoddajné a krepovité vlasy',
+                'hrubšie a ťažšie upraviteľné vlasy',
+                'suché a porézne dĺžky',
+                'vlasy reagujúce na vlhkosť',
+                'vlasy, ktoré potrebujú uhladenie a väčšiu kontrolu',
+            ],
+            'expect'      => [
+                'hladšie a disciplinovanejšie vlasy',
+                'redukciu krepovatenia',
+                'väčšiu hebkosť a poddajnosť',
+                'jednoduchšie rozčesávanie a následný styling',
+                'lesklejší a upravenejší vzhľad vlasov',
+            ],
+            'usage'       => 'Naneste Smoothing Taming Shampoo na mokrú vlasovú pokožku a vlasy. Jemne vmasírujte končekmi prstov a rovnomerne rozpracujte do dĺžok, aby sa vlasy šetrne vyčistili a pripravili na následnú uhladzujúcu starostlivosť. Dôkladne opláchnite a v prípade potreby aplikáciu zopakujte. Pre kompletnú Taming rutinu pokračujte Smoothing Taming Conditioner, ktorý pomáha vlasové vlákno ďalej uhladiť, zjemniť a kontrolovať krepovatenie.',
+        ],
+        'Smoothing Taming Conditioner' => [
+            'subtitle'    => 'Uhladzujúci kondicionér pre nepoddajné a krepovité vlasy',
+            'description' => 'Kondicionačná starostlivosť vytvorená pre vlasy, ktoré potrebujú väčšiu kontrolu, hebkosť a uhladenie. Pomáha disciplinovať nepoddajné vlasové vlákno, redukovať krepovatenie a uľahčiť rozčesávanie. Vlasy zostávajú hladšie, mäkšie a poddajnejšie bez straty prirodzeného pohybu.',
+            'for_whom'    => [
+                'nepoddajné a krepovité vlasy',
+                'suché, drsné a porézne dĺžky',
+                'hrubšie vlasy, ktoré sa ťažšie upravujú',
+                'vlasy reagujúce na vlhkosť',
+                'vlasy, ktoré potrebujú uhladenie bez zbytočného zaťaženia',
+            ],
+            'expect'      => [
+                'výraznejšie uhladenie vlasového vlákna',
+                'menej krepovatenia',
+                'jednoduchšie rozčesávanie',
+                'hebkejšie a poddajnejšie dĺžky',
+                'väčší lesk',
+                'disciplinovanejší a upravenejší výsledok',
+            ],
+            'usage'       => 'Po umytí vlasov Smoothing Taming Shampoo naneste Smoothing Taming Conditioner do uterákom vysušených vlasov, najmä do dĺžok a končekov. Rovnomerne rozpracujte a jemne prečešte, aby sa produkt dostal do všetkých dĺžok. Nechajte krátko pôsobiť a následne dôkladne opláchnite. Pokračujte bežným stylingom; pri vlasoch so sklonom ku krepovateniu môžete následne použiť Taming Gloss pre ešte výraznejšie uhladenie a kontrolu.',
+        ],
+        'Dry Scalp Massage Oil' => [
+            'subtitle'    => 'Vyživujúci masážny olej pre suchú vlasovú pokožku',
+            'description' => 'Intenzívna olejová starostlivosť vytvorená pre suchú, dehydrovanú a napätú vlasovú pokožku. Pomáha pokožku vyživovať, zjemňovať a obnovovať jej komfort, pričom masáž podporuje príjemný pocit uvoľnenia a celkovú starostlivosť o pokožku hlavy.',
+            'for_whom'    => [
+                'suchá a dehydrovaná vlasová pokožka',
+                'pokožka s pocitom pnutia a diskomfortu',
+                'suchá a šupinatá pokožka',
+                'pokožka, ktorá potrebuje intenzívnejšiu výživu',
+                'každý, kto chce zaradiť olejovú masáž do scalp-care rutiny',
+            ],
+            'expect'      => [
+                'intenzívnejšie vyživenú vlasovú pokožku',
+                'zmiernenie pocitu suchosti a pnutia',
+                'mäkšiu a komfortnejšiu pokožku',
+                'podporu prirodzenej rovnováhy pokožky',
+                'príjemný relaxačný efekt masáže',
+                'lepšie pripravenú pokožku na následné umytie a starostlivosť',
+            ],
+            'usage'       => 'Aplikujte Dry Scalp Massage Oil po jednotlivých sekciách priamo na suchú vlasovú pokožku pred umytím vlasov. Jemne masírujte končekmi prstov krúživými pohybmi, aby sa olej rovnomerne rozložil a pokožka ho mohla absorbovať. Nechajte krátko pôsobiť a následne pokračujte umytím vhodným šampónom podľa potrieb vlasovej pokožky. Pri suchej pokožke môžete následne pokračovať ďalšími produktmi rutiny.',
+        ],
+        'Hair and Scalp Tonic Conditioner' => [
+            'subtitle'    => 'Ošetrujúci kondicionér pre vlasy a vlasovú pokožku',
+            'description' => 'Kondicionér vytvorený pre komplexnú starostlivosť o vlasy aj vlasovú pokožku. Pomáha vlasové vlákno hydratovať, zjemniť a uľahčiť jeho rozčesávanie a zároveň poskytuje pokožke príjemnú osviežujúcu starostlivosť. Vlasy zostávajú hebké, poddajné a ľahké bez zbytočného zaťaženia.',
+            'for_whom'    => [
+                'všetky typy vlasov a vlasovej pokožky',
+                'suchšie a dehydrované vlasy',
+                'vlasy, ktoré sa ťažšie rozčesávajú',
+                'vlasová pokožka, ktorá potrebuje osvieženie a starostlivosť',
+                'každý, kto chce ošetriť vlasy aj vlasovú pokožku v jednom kroku',
+            ],
+            'expect'      => [
+                'hebkejšie a hydratovanejšie vlasy',
+                'jednoduchšie rozčesávanie',
+                'svieži a komfortný pocit vlasovej pokožky',
+                'väčšiu poddajnosť vlasov',
+                'ľahké a nezaťažené dĺžky',
+                'komplexnú starostlivosť o vlasy aj pokožku',
+            ],
+            'usage'       => 'Po umytí vlasov naneste Hair and Scalp Tonic Conditioner na čisté, uterákom vysušené vlasy a vlasovú pokožku. Jemne vmasírujte do pokožky a rovnomerne rozpracujte do dĺžok a končekov. Nechajte krátko pôsobiť a následne dôkladne opláchnite.',
+        ],
+        'Dry Shampoo' => [
+            'subtitle'    => 'Suchý šampón pre okamžité osvieženie vlasov',
+            'description' => 'Praktická starostlivosť na rýchle osvieženie vlasov medzi jednotlivými umytiami. Pomáha absorbovať nadbytočný maz pri korienkoch, obnoviť pocit čistoty a dodať vlasom ľahkosť a objem bez použitia vody. Ideálny aj na oživenie účesu počas dňa.',
+            'for_whom'    => [
+                'rýchlo sa mastiace vlasy a korienky',
+                'vlasy, ktoré potrebujú osviežiť medzi umytiami',
+                'jemné a spľasnuté vlasy bez objemu',
+                'predĺženie sviežeho vzhľadu účesu',
+                'každého, kto potrebuje rýchle osvieženie vlasov bez umývania',
+            ],
+            'expect'      => [
+                'absorpciu nadbytočného mazu',
+                'sviežejší a čistejší vzhľad korienkov',
+                'ľahšie pôsobiace vlasy',
+                'podporu objemu a textúry',
+                'predĺženie času medzi jednotlivými umytiami',
+                'rýchle oživenie účesu',
+            ],
+            'usage'       => 'Pred použitím Dry Shampoo dôkladne pretrepte. Nastriekajte na suché vlasy ku korienkom zo vzdialenosti približne 20–30 cm, najmä na miesta s viditeľnou mastnotou. Nechajte produkt krátko pôsobiť, aby absorboval nadbytočný maz, následne jemne vmasírujte končekmi prstov a vlasy dôkladne prečešte. Neoplachujte a pokračujte bežným stylingom.',
         ],
     ];
 }

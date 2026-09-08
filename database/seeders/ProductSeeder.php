@@ -54,7 +54,7 @@ class ProductSeeder extends Seeder
                 ['Reconstruct Biphasic Leave-in Filler Conditioner', '100 ml', 14, false, 'tall', 'reconstruct-biphasic'],
                 ['Reconstruct Biphasic Leave-in Filler Conditioner', '200 ml', 24, false, 'tall', 'reconstruct-biphasic'],
                 ['Reconstruct Serum', '50 ml', 29, false, 'tall', null],
-                ['Reconstruct Brand Kit Premium', '340 ml + 150 ml + 200 ml', 91, false, 'sachet', null],
+                // Reconstruct Brand Kit Premium – brand kity vymazané na žiadosť klienta (9/2026).
             ],
             'keeping-after-color' => [
                 ['Keeping After Color Shampoo', '340 ml', 31, false, 'tall', 'kac-shampoo'],
@@ -63,7 +63,7 @@ class ProductSeeder extends Seeder
                 ['Keeping After Color Conditioner', '1000 ml', 82, true, 'tall', 'kac-conditioner'],
                 ['Keeping After Color Treatment', '150 ml', 22, false, 'tall', 'kac-treatment'],
                 ['Keeping After Color Treatment', '1000 ml', 103, true, 'tall', 'kac-treatment'],
-                // Keeping After Color Brand Kit Premium – vymazaný na žiadosť klienta (9/2026).
+                // Keeping After Color Brand Kit Premium – brand kity vymazané na žiadosť klienta (9/2026).
             ],
             'energising' => [
                 ['Energising Shampoo', '340 ml', 31, false, 'tall', 'energising-shampoo'],
@@ -77,7 +77,7 @@ class ProductSeeder extends Seeder
                 ['Hair Regrowth Treatment', '100 ml', 101, false, 'tall', 'regrowth-treatment'],
                 ['Hair Regrowth Treatment', '10 × 3 ml', 58, false, 'sachet', 'regrowth-treatment'],
                 ['Regrowth Duo Kit', '350 ml + 100 ml', 132, false, 'sachet', null],
-                ['Regrowth Brand Kit Premium', '350 ml + 100 ml', 132, false, 'sachet', null],
+                // Regrowth Brand Kit Premium – brand kity vymazané na žiadosť klienta (9/2026).
             ],
             'purifying' => [
                 ['Purifying Shampoo', '340 ml', 31, false, 'tall', 'purifying-shampoo'],
@@ -104,7 +104,7 @@ class ProductSeeder extends Seeder
                 ['Calming Shampoo', '350 ml', 31, false, 'tall', 'calming-shampoo'],
                 ['Calming Shampoo', '950 ml', 72, true, 'tall', 'calming-shampoo'],
                 ['Calming Duo Kit', '350 ml + 50 ml', 91, false, 'sachet', null],
-                ['Calming Brand Kit Premium', '350 ml + 50 ml', 91, false, 'sachet', null],
+                // Calming Brand Kit Premium – brand kity vymazané na žiadosť klienta (9/2026).
             ],
             'rebalancing' => [
                 ['Rebalancing Treatment', '100 ml', 43, false, 'tall', null],
