@@ -23,6 +23,10 @@
 <body>
 
     @include('partials.nav', ['active' => $active ?? null])
+    {{-- Salon sub-navigation stays visible on every page once a salon is logged in (B2B pages include it themselves). --}}
+    @if (auth('b2b')->check() && !request()->routeIs('b2b.*'))
+        @include('partials.b2b-nav', ['active' => request()->routeIs('shop.*', 'product.*') ? 'shop' : null])
+    @endif
 
     @yield('content')
 

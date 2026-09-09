@@ -109,6 +109,13 @@ class ProductEditScreen extends Screen
                     ->value(implode("\n", $this->product->expect ?? []))
                     ->help('Jedna položka na riadok – zobrazí sa ako odrážky.'),
                 TextArea::make('product.usage')->title('Použitie')->rows(5)->help('Návod na použitie (súvislý text).'),
+                Matrix::make('product.pro_sections')
+                    ->title('Profi sekcie (salónne produkty)')
+                    ->help('Pre farby, melíry, peroxidy: až 3 sekcie s vlastným nadpisom (napr. Výsledok / Formula / Prečo Earth). Zobrazia sa namiesto sekcií „Pre koho je / Čo očakávať / Použitie“.')
+                    ->columns(['title' => 'Nadpis', 'body' => 'Text'])
+                    ->fields(['body' => TextArea::make()->rows(4)])
+                    ->addRowLabel('+ Pridať sekciu')
+                    ->value($this->product->pro_sections ?? []),
 
                 Matrix::make('product.shades')
                     ->title('Odtiene (pre farbiace produkty)')
@@ -149,6 +156,12 @@ class ProductEditScreen extends Screen
         $data['expect']   = $linesToArray($request->input('expect_text'));
         // A deselected multi-select sends nothing at all — treat that as "no extra collections".
         $data['extra_line_ids'] = $data['extra_line_ids'] ?? [];
+
+        $data['pro_sections'] = collect((array) ($data['pro_sections'] ?? []))
+            ->filter(fn ($row) => is_array($row) && (trim((string) ($row['title'] ?? '')) !== '' || trim((string) ($row['body'] ?? '')) !== ''))
+            ->map(fn ($row) => ['title' => trim((string) ($row['title'] ?? '')), 'body' => trim((string) ($row['body'] ?? ''))])
+            ->values()
+            ->all() ?: null;
 
         // Slug is auto-generated from the name (unique-suffixed on collision) —
         // admins don't manage it manually. Keep an existing slug on edit.

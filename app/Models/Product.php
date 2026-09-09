@@ -24,9 +24,15 @@ class Product extends Model
     protected $fillable = [
         'line_id', 'extra_line_ids', 'code', 'sku', 'stock', 'variant_group', 'slug', 'name', 'subtitle', 'line_label',
         'complex', 'volume', 'price', 'discount_percent', 'badge', 'kind', 'tone', 'cap',
-        'image_path', 'description', 'for_whom', 'expect', 'usage',
+        'image_path', 'description', 'for_whom', 'expect', 'usage', 'pro_sections',
         'fragrance', 'shades', 'sort_order', 'published', 'featured', 'b2b_only',
     ];
+
+    /** Collections that make up the professional (salon-only) range. */
+    public const PRO_LINE_SLUGS = ['earth-professional-color', 'virtuos-professional-color', 'waving-system'];
+
+    /** Virtual shop filter value (line and type) that selects the whole PREVIA PRO range. */
+    public const PRO_FILTER = 'previa-pro';
 
     protected $casts = [
         'price' => 'decimal:2',
@@ -39,6 +45,7 @@ class Product extends Model
         'extra_line_ids' => 'array',
         'for_whom' => 'array',
         'expect' => 'array',
+        'pro_sections' => 'array',
         'fragrance' => 'array',
         'shades' => 'array',
     ];
@@ -234,13 +241,18 @@ class Product extends Model
 
     public function getTypeAttribute(): string
     {
-        $s = mb_strtolower(($this->subtitle ?? '') . ' ' . ($this->name ?? ''));
+        $name = mb_strtolower((string) $this->name);
+        $s = mb_strtolower(($this->subtitle ?? '') . ' ' . $name);
         if (mb_strtolower($this->line_label ?? '') === 'sada' || preg_match('/\b(kit|sada)\b/u', $s)) return 'kity';
-        if (preg_match('/\b(farba|farbenie|color|peroxid|oxid|bleach|blond|gloss|melír|toner)\b/u', $s)) return 'farba';
-        if (str_contains($s, 'šampón') || str_contains($s, 'shampoo')) return 'sampon';
-        if (str_contains($s, 'maska') || str_contains($s, 'mask')) return 'maska';
-        if (str_contains($s, 'kondicionér') || str_contains($s, 'conditioner')) return 'kondicioner';
-        if (str_contains($s, 'olej') || str_contains($s, 'sérum') || str_contains($s, 'oil') || str_contains($s, 'serum')) return 'olej-serum';
+        // Product form first (a "Keeping After Color Shampoo" is a shampoo, not a colour).
+        if (str_contains($name, 'shampoo') || str_contains($s, 'šampón')) return 'sampon';
+        if (str_contains($name, 'treatment') && str_contains($s, 'maska') || str_contains($name, 'mask')) return 'maska';
+        if (str_contains($name, 'conditioner') || str_contains($s, 'kondicionér')) return 'kondicioner';
+        // Professional technical range.
+        if (preg_match('/bleach|melír|zosvetľ/u', $s)) return 'melir';
+        if (preg_match('/peroxid|activator|aktivátor|oxidant/u', $s)) return 'peroxidy';
+        if (preg_match('/\b(farba|farbenie|color|colour|toner|toning|infusion|waving|neutralizer)\b/u', $s)) return 'farba';
+        if (preg_match('/\b(olej|oil|sérum|serum)\b/u', $s)) return 'olej-serum';
         return 'styling';
     }
 
@@ -252,8 +264,35 @@ class Product extends Model
             'kondicioner' => 'Kondicionér',
             'olej-serum'  => 'Olej a sérum',
             'styling'     => 'Styling',
-            'farba'       => 'Farba',
             'kity'        => 'Kity',
+            'farba'       => 'Farby',
+            'melir'       => 'Melíry',
+            'peroxidy'    => 'Peroxidy a aktivátory',
         ];
+    }
+
+    /**
+     * Part of PREVIA PRO – the professional range sold only to salons: the colour /
+     * bleaching / waving lines plus stand-alone salon-only items (Basic Shampoo 1 l,
+     * Scalp Protective Oil, samplers). Salon sizes of retail products (1000 ml
+     * variants) are NOT pro products – they live on the retail product's page.
+     */
+    public function isPro(): bool
+    {
+        if (!$this->b2b_only) return false;
+        static $proLineIds = null;
+        $proLineIds ??= ProductLine::whereIn('slug', self::PRO_LINE_SLUGS)->pluck('id')->map(fn ($v) => (int) $v)->all();
+        if ($this->line_id && in_array((int) $this->line_id, $proLineIds, true)) return true;
+        return $this->variant_group === null;
+    }
+
+    /** Free-text product search (name, Slovak subtitle, collection). */
+    public function scopeSearch(\Illuminate\Database\Eloquent\Builder $query, string $term): \Illuminate\Database\Eloquent\Builder
+    {
+        $like = '%' . str_replace(['%', '_'], ['\%', '\_'], trim($term)) . '%';
+        return $query->where(fn ($q) => $q
+            ->where('name', 'like', $like)
+            ->orWhere('subtitle', 'like', $like)
+            ->orWhere('line_label', 'like', $like));
     }
 }

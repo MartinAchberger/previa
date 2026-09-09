@@ -1,30 +1,34 @@
 @extends('layouts.app')
 
-@section('title', 'Farby pre salóny · ' . $b2b->salon_name)
+@section('title', 'PREVIA PRO · ' . $b2b->salon_name)
 
 @section('content')
 
-@include('partials.b2b-nav', ['active' => 'colors'])
+@include('partials.b2b-nav', ['active' => 'pro'])
 
 <section class="shop-head">
     <div class="crumbs">
         <a href="{{ route('b2b.dashboard') }}" style="color:inherit;text-decoration:none">Salón</a>
         <span class="sep">/</span>
-        <span>Farby</span>
+        <span>Previa Pro</span>
     </div>
-    <h1>Farby<br><em>· profesionálna paleta.</em></h1>
+    <h1>PREVIA PRO<br><em>· všetko pre profesionála.</em></h1>
     <div class="meta">
-        <div class="ds">Vyber radu farby a otvor detail s celou škálou odtieňov. V detaile si klikneš odtiene a množstvá naraz a jedným tlačidlom ich pridáš do košíka.</div>
+        <div class="ds">Objav kompletnú profesionálnu ponuku PREVIA - od permanentných a bezamoniakových farieb cez zosvetľovacie produkty až po oxidanty a technickú starostlivosť pre každodennú prácu v salóne.</div>
+        <nav class="pro-jump">
+            @if ($colorProducts->isNotEmpty())<a href="#pro-farby">Farby</a>@endif
+            @foreach ($proGroups as $key => $g)<a href="#pro-{{ $key }}">{{ $g['title'] }}</a>@endforeach
+            @if ($salonSizes->isNotEmpty())<a href="#pro-balenia">Salónne balenia</a>@endif
+        </nav>
     </div>
 </section>
 
-@if ($colorProducts->isEmpty())
-    <div style="padding: 96px 56px; text-align: center; color: var(--mute)">
-        <p>Zatiaľ žiadne farebné rady s odtieňmi.</p>
-        <p style="font-size:13px">Pridaj odtiene cez admin v sekcii Produkty → vyber farebný produkt → Matrix „shades".</p>
-    </div>
-@else
-    <section class="bulk-lines">
+@if ($colorProducts->isNotEmpty())
+    <section class="bulk-lines" id="pro-farby">
+        <div class="section-head">
+            <h2 class="h2">Farby <em>· celá paleta odtieňov.</em></h2>
+            <div class="section-sub">Otvor radu, vyber odtiene a množstvá naraz a jedným tlačidlom ich pridaj do košíka.</div>
+        </div>
         <div class="grid-4">
             @foreach ($colorProducts as $cp)
                 @php
@@ -82,6 +86,34 @@
                         </div>
                     </div>
                 </a>
+            @endforeach
+        </div>
+    </section>
+@endif
+
+@foreach ($proGroups as $key => $g)
+    <section class="pro-group" id="pro-{{ $key }}">
+        <div class="section-head">
+            <h2 class="h2">{{ $g['title'] }} <em>· {{ $g['sub'] }}.</em></h2>
+            <div class="section-sub">{{ $g['products']->count() }} {{ $g['products']->count() === 1 ? 'produkt' : ($g['products']->count() < 5 ? 'produkty' : 'produktov') }}</div>
+        </div>
+        <div class="grid-4">
+            @foreach ($g['products'] as $p)
+                @include('partials.product-card', ['p' => $p])
+            @endforeach
+        </div>
+    </section>
+@endforeach
+
+@if ($salonSizes->isNotEmpty())
+    <section class="pro-group" id="pro-balenia">
+        <div class="section-head">
+            <h2 class="h2">Salónne balenia <em>· litrové veľkosti.</em></h2>
+            <div class="section-sub">{{ $salonSizes->count() }} produktov · menšie veľkosti nájdeš v eshope</div>
+        </div>
+        <div class="grid-4">
+            @foreach ($salonSizes as $p)
+                @include('partials.product-card', ['p' => $p])
             @endforeach
         </div>
     </section>

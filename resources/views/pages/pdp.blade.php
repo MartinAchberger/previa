@@ -13,6 +13,10 @@
     $usage    = trim((string) $product->usage);
     $descriptionParas = array_values(array_filter(array_map('trim', preg_split('/\R{2,}/u', (string) $product->description))));
     $detailCols = ($forWhom ? 1 : 0) + ($expect ? 1 : 0) + ($usage !== '' ? 1 : 0);
+    // Professional products: free-form sections with their own headings (Výsledok / Formula / Prečo …).
+    $proSections = collect((array) ($product->pro_sections ?? []))
+        ->filter(fn ($s) => is_array($s) && (trim((string) ($s['title'] ?? '')) !== '' || trim((string) ($s['body'] ?? '')) !== ''))
+        ->values();
 @endphp
 
 <section class="pdp{{ ($product->hasShades() && auth('b2b')->check()) ? ' pdp--shades' : '' }}">
@@ -439,6 +443,19 @@
         <p class="pdp-usage">{{ $usage }}</p>
     </div>
     @endif
+</section>
+@endif
+
+@if($proSections->isNotEmpty())
+<section class="pdp-detail pdp-detail--{{ min(3, $proSections->count()) }} pdp-detail--pro">
+    @foreach($proSections as $i => $sec)
+    <div class="col">
+        <div class="line" style="margin-bottom:18px">- {{ trim((string) ($sec['title'] ?? '')) }}</div>
+        @foreach(array_filter(array_map('trim', preg_split('/\R{2,}/u', (string) ($sec['body'] ?? '')))) as $para)
+            <p class="pdp-usage">{{ $para }}</p>
+        @endforeach
+    </div>
+    @endforeach
 </section>
 @endif
 

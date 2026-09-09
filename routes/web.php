@@ -65,6 +65,7 @@ Route::prefix('b2b')->name('b2b.')->group(function () {
         Route::get('/objednavky/{orderNumber}', [B2bDashboardController::class, 'orderDetail'])->name('order.detail');
         Route::get('/profil', [B2bDashboardController::class, 'profile'])->name('profile');
         Route::post('/profil', [B2bDashboardController::class, 'profileUpdate'])->name('profile.update');
-        Route::get('/farby', [B2bBulkOrderController::class, 'show'])->name('colors');
+        Route::get('/previa-pro', [B2bBulkOrderController::class, 'show'])->name('pro');
+        Route::redirect('/farby', '/b2b/previa-pro'); // pôvodná adresa záložky „Farby“
     });
 });

@@ -5687,3 +5687,150 @@ input.is-invalid, select.is-invalid, textarea.is-invalid {
   color: var(--mute);
   margin: 18px 0 10px;
 }
+
+/* ── Shop header: search instead of the diagnostics banner (9/2026) ─────── */
+.shop-search {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  min-width: 300px;
+}
+
+.shop-search input {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  padding: 12px 16px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  min-width: 0;
+}
+
+.shop-search input::placeholder {
+  color: var(--mute);
+}
+
+.shop-search input:focus {
+  outline: none;
+}
+
+.shop-search button {
+  border: 0;
+  border-left: 1px solid var(--line);
+  background: transparent;
+  padding: 0 18px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.shop-search button:hover {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.shop-fil-quiz {
+  padding-top: 4px;
+}
+
+.shop-fil-quiz-link {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s;
+}
+
+.shop-fil-quiz-link:hover {
+  background: var(--bg-2);
+}
+
+.shop-fil-quiz-link .eyebrow-sm {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+
+.shop-fil-quiz-link strong {
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+}
+
+.shop-fil .opt--pro .lab {
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 1100px) {
+  .shop-head .meta {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+  }
+  .shop-head .meta .ds {
+    max-width: 100%;
+  }
+  .shop-search {
+    min-width: 0;
+  }
+  .shop-fil-quiz {
+    padding: 12px 0 16px;
+    border-bottom: 0 !important;
+  }
+}
+/* ── PREVIA PRO (salon zone) ────────────────────────────────────────────── */
+.pro-jump {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  max-width: 520px;
+}
+
+.pro-jump a {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mute);
+  text-decoration: none;
+  border: 1px solid var(--line);
+  padding: 8px 14px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.pro-jump a:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.pro-group {
+  padding: 64px 56px;
+  border-bottom: 1px solid var(--line);
+}
+
+.bulk-lines .section-head {
+  margin-bottom: 32px;
+}
+
+.pdp-detail--pro h3 {
+  font-size: 22px;
+}
+
+@media (max-width: 1100px) {
+  .pro-jump {
+    justify-content: flex-start;
+    max-width: 100%;
+  }
+  .pro-group {
+    padding: 40px 24px;
+  }
+}

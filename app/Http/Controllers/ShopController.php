@@ -29,10 +29,21 @@ class ShopController extends Controller
         $activeLine = $request->query('line');
         $activeType = $request->query('type');
         $activeSort = $request->query('sort');
+        $searchTerm = trim((string) $request->query('q', ''));
+
+        // "previa-pro" is a virtual collection/type for salons: the whole professional range.
+        $proFilter = $isB2b && ($activeLine === Product::PRO_FILTER || $activeType === Product::PRO_FILTER);
+        if (!$isB2b && ($activeLine === Product::PRO_FILTER || $activeType === Product::PRO_FILTER)) {
+            $activeLine = $activeLine === Product::PRO_FILTER ? null : $activeLine;
+            $activeType = $activeType === Product::PRO_FILTER ? null : $activeType;
+        }
 
         $query = Product::query()->where('published', true);
         if (!$isB2b) {
             $query->where('b2b_only', false);
+        }
+        if ($searchTerm !== '') {
+            $query->search($searchTerm);
         }
 
         match ($activeSort) {
@@ -48,7 +59,9 @@ class ShopController extends Controller
 
         $products = Product::dedupeSizeVariants($query->get());
 
-        if ($activeType) {
+        if ($proFilter) {
+            $products = $products->filter(fn ($p) => $p->isPro())->values();
+        } elseif ($activeType) {
             $products = $products->filter(fn ($p) => $p->type === $activeType)->values();
         }
 
@@ -60,7 +73,7 @@ class ShopController extends Controller
         );
         $totalProducts = $allProducts->count();
 
-        $typeCounts = $allProducts->groupBy(fn ($p) => $p->type)->map->count();
+        $typeCounts = $allProducts->groupBy(fn ($p) => $p->type)->map->count()->all();
         // A product counts towards its primary line and every extra collection it is listed in.
         $lineCounts = [];
         foreach ($allProducts as $p) {
@@ -68,10 +81,11 @@ class ShopController extends Controller
                 $lineCounts[$id] = ($lineCounts[$id] ?? 0) + 1;
             }
         }
+        $proCount = $isB2b ? $allProducts->filter(fn ($p) => $p->isPro())->count() : 0;
 
         return view('pages.shop', compact(
             'lines', 'products', 'totalProducts',
-            'activeLine', 'activeLineModel', 'activeType', 'activeSort',
+            'activeLine', 'activeLineModel', 'activeType', 'activeSort', 'searchTerm', 'proFilter', 'proCount',
             'typeCounts', 'lineCounts'
         ));
     }

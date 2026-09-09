@@ -38,6 +38,25 @@ class ProductContentSeeder extends Seeder
             }
         }
 
+        foreach (self::PRO_SECTIONS as $name => $sections) {
+            $rows = $byName->get($name);
+            if (!$rows) {
+                $this->command?->warn("ProductContentSeeder: profi produkt „{$name}“ v katalógu neexistuje – text preskočený.");
+                continue;
+            }
+            foreach ($rows as $product) {
+                $product->forceFill(['pro_sections' => $sections])->save();
+            }
+        }
+
+        // Fotky dodané dodatočne: ak existuje public/products/<slug>.png, použi ju.
+        Product::withoutGlobalScopes()->each(function (Product $p) {
+            $path = '/products/' . $p->slug . '.png';
+            if (file_exists(public_path($path)) && $p->image_path !== $path) {
+                $p->forceFill(['image_path' => $path])->save();
+            }
+        });
+
         // Produkty bez dodaného textu: žiadna latinčina na webe.
         Product::withoutGlobalScopes()
             ->whereNotIn('name', array_keys(self::CONTENT))
@@ -1114,4 +1133,88 @@ Regrowth Shampoo 350 ml + Hair Regrowth Treatment 100 ml',
             'usage'       => 'Pred použitím Dry Shampoo dôkladne pretrepte. Nastriekajte na suché vlasy ku korienkom zo vzdialenosti približne 20–30 cm, najmä na miesta s viditeľnou mastnotou. Nechajte produkt krátko pôsobiť, aby absorboval nadbytočný maz, následne jemne vmasírujte končekmi prstov a vlasy dôkladne prečešte. Neoplachujte a pokračujte bežným stylingom.',
         ],
     ];
+    /** Profi produkty (salón): 3 sekcie s vlastnými nadpismi (klient, 8. 9. 2026). */
+    public const PRO_SECTIONS = [
+        'Earth Permanent Color' => [
+            ['title' => 'VÝSLEDOK', 'body' => 'Permanentná profesionálna farba, ktorá spája vysoký farebný výkon s prirodzene pôsobiacim výsledkom. Poskytuje spoľahlivé krytie bielych vlasov, žiarivé odlesky a dlhotrvajúcu farbu, pričom jej odtiene sú postavené na chladnejších modro-fialových základoch pre čistý, elegantný a prirodzený výsledok. Paleta 69 vzájomne kombinovateľných odtieňov dáva koloristovi široký priestor na tvorbu individuálnych receptúr.'],
+            ['title' => 'FORMULA', 'body' => 'To, čo robí Earth výnimočnou, je jej bezakomoniaková a mimoriadne šetrná formula. Obsahuje ingrediencie rastlinného pôvodu, certifikované organické esenciálne oleje z citróna a pomaranča s revitalizačným a antioxidačným účinkom, organický olej zo semien passiflory pre lesk a vitalitu a rastlinné oleje z hroznových jadier a sladkých mandlí, ktoré pomáhajú vlas hydratovať a chrániť pokožku počas pôsobenia farby. Navyše je bez PPD, resorcinolu, PEG/PPG, minerálnych olejov, petrolátu, parabénov a ďalších potenciálne agresívnych zložiek. Earth je zároveň vegan a cruelty-free podľa PETA.'],
+            ['title' => 'PREČO EARTH', 'body' => 'Pre salóny, ktoré chcú klientkam ponúknuť šetrnejšiu alternatívu klasického permanentného farbenia bez kompromisu vo výsledku. Earth umožňuje pracovať s permanentnou farbou bez amoniaku, s vysokým krytím a dlhou výdržou, no zároveň kladie výrazne väčší dôraz na komfort pokožky, kvalitu vlasového vlákna a starostlivo zvolené zloženie. Je ideálnou voľbou pre moderný salón, ktorý nechce predávať iba krásny odtieň, ale aj premyslenejší a prémiovejší prístup k samotnému farbeniu.'],
+        ],
+        'Earth Powder Infusion' => [
+            ['title' => 'VÝSLEDOK', 'body' => 'Profesionálne rastlinné farbenie pre prirodzene pôsobiaci, žiarivý a dlhotrvajúci výsledok bez typického efektu klasickej permanentnej farby. Pigmenty vlas postupne obaľujú bez trvalého naviazania na keratín vlasového vlákna, vďaka čomu sa farba postupne a prirodzene vymýva bez výraznej línie odrastu. Umožňuje krytie bielych vlasov až približne do 80 % a jednotlivé odtiene možno medzi sebou kombinovať pre vytvorenie individuálneho farebného výsledku.'],
+            ['title' => 'FORMULA', 'body' => 'Earth Powder Infusion je práškové farbenie na rastlinnej báze, vytvorené z pigmentov pochádzajúcich z listov, koreňov, kvetov a plodov, doplnených o čisté priame pigmenty pre vyššiu farebnú výkonnosť. Po zmiešaní iba s vodou vzniká farbiaca zmes s 98,7 % ingrediencií rastlinného pôvodu. Formula je vegánska, dermatologicky testovaná a neobsahuje amoniak, ethanolamín, PPD, resorcinol, SLS, SLES ani parabény.'],
+            ['title' => 'PREČO EARTH POWDER INFUSION', 'body' => 'Ideálna voľba pre salóny, ktoré chcú klientkam ponúknuť maximálne šetrnú alternatívu profesionálneho farbenia a rozšíriť svoje colour menu o službu založenú na rastlinných ingredienciách. Jemná formula rešpektuje prirodzenú štruktúru vlasu a pokožku hlavy, pričom stále poskytuje profesionálny farebný výkon. Veľkou výhodou je aj kompatibilita s ďalšími kaderníckymi službami – Powder Infusion možno striedať s klasickým farbením a podľa technických materiálov Previa nebráni ani následnému zosvetľovaniu.'],
+        ],
+        'Blue Bleach' => [
+            ['title' => 'VÝSLEDOK', 'body' => 'Profesionálny bezprašný zosvetľovací prášok pre intenzívne a kontrolované zosvetlenie až o 6–7 úrovní. Modré pigmenty počas procesu pomáhajú neutralizovať najmä oranžové a žlto-oranžové podtóny, vďaka čomu vytvárajú čistejší základ pre ďalšie tónovanie alebo finálnu blond. Ideálny najmä pri zosvetľovaní vlasov z úrovní približne 5–7.'],
+            ['title' => 'TECHNOLÓGIA & KONTROLA', 'body' => 'Formulácia je navrhnutá tak, aby poskytovala profesionálovi stabilný a predvídateľný priebeh zosvetľovania. Obsahuje EDTA, ktorá viaže usadeniny kovov a pomáha stabilizovať proces zosvetlenia. Výsledkom je lepšia kontrola nad prácou s pigmentom a rovnomernejšie zosvetlenie.'],
+            ['title' => 'PREČO BLUE BLEACH', 'body' => 'Voľba pre salón, ktorý potrebuje silné zosvetlenie a zároveň chce už počas procesu pracovať proti teplým oranžovým tónom. Vhodný pre melíry, fóliové techniky aj moderné blond transformačné služby, pri ktorých je cieľom dostať vlas k čo najčistejšiemu základu pred následným tónovaním.'],
+        ],
+        'Violet Bleach' => [
+            ['title' => 'VÝSLEDOK', 'body' => 'Bezpráškový profesionálny zosvetľovač s možnosťou zosvetlenia až o 6–7 úrovní. Fialové pigmenty cielene korigujú žlté a žlto-oranžové podtóny, ktoré sa objavujú pri zosvetľovaní svetlejších základov. Výsledkom je čistejšia, chladnejšia blond s menším množstvom nežiaduceho tepla. Ideálny najmä pri úrovniach približne 7–9.'],
+            ['title' => 'TECHNOLÓGIA & KONTROLA', 'body' => 'Pigmentovaná formula spája zosvetlenie s priebežnou optickou neutralizáciou teplých tónov. EDTA zároveň pomáha zachytávať kovové usadeniny a stabilizovať zosvetľovací proces, čo profesionálovi poskytuje väčšiu kontrolu nad výsledkom.'],
+            ['title' => 'PREČO VIOLET BLEACH', 'body' => 'Ideálna voľba všade tam, kde je cieľom čistá studenšia blond a pri zosvetľovaní očakávate prevažne žlté pigmenty. Skvelý pomocník pri blonding službách, balayage či melíroch, pri ktorých chcete vytvoriť čo najčistejšie plátno pre béžové, perleťové, popolavé alebo icy odtiene.'],
+        ],
+        'White Bleach' => [
+            ['title' => 'VÝSLEDOK', 'body' => 'Profesionálny biely zosvetľovací prášok určený na čisté, prirodzené zosvetlenie až o 6–7 úrovní. Na rozdiel od Blue a Violet verzie neobsahuje korekčný pigment, takže počas procesu nemení charakter zostávajúceho podkladového pigmentu. Profesionál tak vidí prirodzený priebeh zosvetlenia a môže naň následne presne nadviazať zvoleným tonerom alebo farbou.'],
+            ['title' => 'MAXIMÁLNA KONTROLA', 'body' => 'White Bleach je univerzálnou voľbou pre techniky, pri ktorých chcete mať výsledný tón úplne vo svojich rukách. Zosvetlí vlas bez pridanej modrej či fialovej neutralizácie a vytvorí čistý základ, s ktorým môže kolorista ďalej cielene pracovať.'],
+            ['title' => 'PREČO WHITE BLEACH', 'body' => 'Pre profesionálov, ktorí preferujú maximálnu flexibilitu. Ideálny pri kreatívnych blond technikách, korekciách a situáciách, keď nechcete neutralizáciu „zabudovanú“ už v zosvetľovači, ale chcete ju zvoliť až podľa reálneho podkladu po zosvetlení. Pre salón je to univerzálny bleach, ktorý necháva finálne rozhodnutie o tóne plne na koloristovi.'],
+        ],
+        'Earth Creme Activator 10 vol – 3 %' => [
+            ['title' => 'KEDY ZVOLIŤ 3 %', 'body' => 'Najjemnejší aktivátor z radu Earth, ideálny tam, kde nepotrebujete výrazné zosvetlenie. Vhodný najmä na tón v tóne, stmavovanie, osvieženie farby alebo prácu s citlivejšími a už chemicky namáhanými vlasmi.'],
+            ['title' => 'ČO OČAKÁVAŤ', 'body' => 'Pomáha dosiahnuť rovnomerné uloženie pigmentu, krásny lesk a kontrolovaný farebný výsledok bez zbytočne vysokej oxidačnej sily. Skvelá voľba pre služby, pri ktorých je prioritou kvalita vlasu a jemnejší prístup.'],
+            ['title' => 'PREČO EARTH ACTIVATOR', 'body' => 'Je navrhnutý ako súčasť systému Earth Color, takže podporuje jeho šetrnejšie a prirodzenejšie zameranie. Ideálny pre salóny, ktoré chcú pracovať precízne, ale zároveň preferujú čo najjemnejšie profesionálne formulácie.'],
+        ],
+        'Earth Creme Activator 20 vol – 6 %' => [
+            ['title' => 'KEDY ZVOLIŤ 6 %', 'body' => 'Univerzálny aktivátor pre klasické permanentné farbenie, krytie šedín a mierne zosvetlenie prirodzeného základu. Je jednou z najpraktickejších volieb pre každodennú salónnu prácu s Earth Color.'],
+            ['title' => 'ČO OČAKÁVAŤ', 'body' => 'Poskytuje vyvážený pomer medzi intenzitou farebného výsledku a kontrolovanou oxidačnou silou. Pomáha dosiahnuť sýtu, rovnomernú farbu, dobré krytie a prirodzene pôsobiaci výsledok.'],
+            ['title' => 'PREČO EARTH ACTIVATOR', 'body' => '6 % je ideálnym „daily essential“ pre koloristu – dostatočne výkonný pre väčšinu permanentných farebných služieb, no stále v súlade s jemnejšou filozofiou systému Earth.'],
+        ],
+        'Earth Creme Activator 30 vol – 9 %' => [
+            ['title' => 'KEDY ZVOLIŤ 9 %', 'body' => 'Pre situácie, keď je potrebné výraznejšie zosvetlenie prirodzeného základu alebo vyššia oxidačná sila pri permanentnom farbení. Vhodný pri väčších farebných transformáciách a svetlejších cieľových odtieňoch.'],
+            ['title' => 'ČO OČAKÁVAŤ', 'body' => 'Umožňuje intenzívnejšiu prácu s prirodzeným pigmentom vlasu a vytvára priestor pre viditeľnejšiu zmenu úrovne. Výsledok zostáva pri správnom výbere receptúry rovnomerný a kontrolovateľný.'],
+            ['title' => 'PREČO EARTH ACTIVATOR', 'body' => 'Pre koloristu, ktorý chce vyšší výkon, ale nechce opustiť systém Earth. Profesionálna voľba tam, kde jemnejšie aktivátory už nestačia na požadovaný farebný výsledok.'],
+        ],
+        'Earth Creme Activator 40 vol – 12 %' => [
+            ['title' => 'KEDY ZVOLIŤ 12 %', 'body' => 'Najsilnejší aktivátor z radu Earth, určený pre techniky, pri ktorých je potrebná maximálna zosvetľovacia schopnosť oxidačného systému. Vhodný predovšetkým pre špecifické profesionálne aplikácie a výraznejšie zosvetlenie prirodzeného základu.'],
+            ['title' => 'ČO OČAKÁVAŤ', 'body' => 'Poskytuje najvyššiu oxidačnú silu zo všetkých Earth Activatorov a umožňuje dosiahnuť výraznejší lift pri správne zvolenej farebnej formulácii. Je určený pre skúseného profesionála, ktorý vie presne vyhodnotiť stav vlasov aj požadovaný výsledok.'],
+            ['title' => 'PREČO EARTH ACTIVATOR', 'body' => 'Dopĺňa systém Earth o možnosť pracovať aj s náročnejšími farebnými transformáciami. Nie je to univerzálny aktivátor na každú klientku, ale presný profesionálny nástroj pre situácie, ktoré si vyžadujú vyšší výkon.'],
+        ],
+        'Earth Free Hand Bleaching Powder' => [
+            ['title' => 'VÝSLEDOK', 'body' => 'Profesionálny zosvetľovací prášok vytvorený špeciálne pre freehand techniky. Umožňuje vytvárať prirodzené prechody, rozjasnenie dĺžok a moderné balayage efekty bez potreby klasického uzatvárania prameňov do fólie.'],
+            ['title' => 'PREČO FREE HAND', 'body' => 'Jeho konzistencia je navrhnutá tak, aby pri práci dobre držala na vlasoch, neroztekala sa a poskytovala koloristovi maximálnu kontrolu nad umiestnením zosvetľovača. Ideálny pre balayage, face framing, sun-kissed efekty a všetky techniky, pri ktorých je precízna ručná aplikácia kľúčová.'],
+            ['title' => 'PREČO EARTH', 'body' => 'Skvelá voľba pre salóny, ktoré chcú spojiť moderné zosvetľovacie techniky s filozofiou Earth a šetrnejším prístupom k vlasom. Produkt umožňuje vytvárať luxusné, prirodzene pôsobiace blond výsledky bez toho, aby bola technika založená iba na maximálnej sile zosvetlenia.'],
+        ],
+        'Earth Gentle Bleaching Paste' => [
+            ['title' => 'ŠETRNÉ ZOSVETLENIE', 'body' => 'Krémová zosvetľovacia pasta vytvorená pre prípady, keď je popri výsledku prioritou aj maximálny komfort a rešpekt k vlasom. Je vhodná najmä pre jemné, citlivejšie alebo už chemicky namáhané vlasy a pre služby, pri ktorých nie je potrebné agresívne zosvetľovanie.'],
+            ['title' => 'OCHRANNÉ ZLOŽENIE', 'body' => 'Formulácia obsahuje ošetrujúce zložky vrátane organického čučoriedkového oleja a komplexu bieleho ílu, ktoré dopĺňajú zosvetľovací systém o ochranný a komfortnejší charakter. Krémová textúra zároveň umožňuje veľmi presnú a príjemnú aplikáciu.'],
+            ['title' => 'PREČO GENTLE BLEACHING PASTE', 'body' => 'Pre salón, ktorý nechce pri každom blonding servise automaticky siahať po klasickom prášku. Je ideálna tam, kde chcete dosiahnuť krásne zosvetlenie, ale zároveň pristupovať k vlasu individuálne a zvoliť jemnejšiu alternatívu podľa jeho aktuálnej kondície.'],
+        ],
+        'Virtuos Color' => [
+            ['title' => 'VÝSLEDOK', 'body' => 'Profesionálna permanentná farba vytvorená pre intenzívny, sýty a dlhotrvajúci farebný výsledok. Poskytuje vysokú kryciu schopnosť, rovnomerné uloženie pigmentu a žiarivý lesk od korienkov až po dĺžky. Široká paleta odtieňov dáva koloristovi priestor na precízne receptúry, prirodzené výsledky aj výraznejšie farebné transformácie.'],
+            ['title' => 'FORMULA', 'body' => 'Profesionálna receptúra spája vysoký farebný výkon so starostlivosťou o kvalitu vlasov počas farbenia. Je navrhnutá tak, aby podporovala intenzitu a stabilitu pigmentu a zároveň pomáhala zachovať vlas hebký, lesklý a príjemný na dotyk. Výsledkom nie je iba nová farba, ale celkovo upravenejší a zdravšie pôsobiaci vzhľad vlasov.'],
+            ['title' => 'PREČO VIRTUOS', 'body' => 'Pre salóny, ktoré od permanentnej farby očakávajú predovšetkým spoľahlivosť, vysoký výkon a maximálnu tvorivú slobodu. Virtuos je systém pre každodennú profesionálnu koloristiku – od krytia šedín a klasického farbenia až po komplexnejšie zmeny odtieňa. V porovnaní s jemnejším, prirodzenejšie orientovaným Earth je Virtuos voľbou tam, kde je prioritou výkon, intenzita a absolútna kontrola nad výsledkom.'],
+        ],
+        'Peroxide 10 vol – 3 %' => [
+            ['title' => 'KEDY ZVOLIŤ 3 %', 'body' => 'Pre jemnejšiu oxidačnú prácu, tón v tóne, stmavovanie a situácie, pri ktorých nie je cieľom výrazné zosvetlenie prirodzeného základu.'],
+            ['title' => 'ČO OČAKÁVAŤ', 'body' => 'Kontrolované pôsobenie s dôrazom na uloženie pigmentu a farebnú presnosť. Vhodná voľba pri práci s dĺžkami alebo pri receptúrach, kde chcete zachovať existujúcu úroveň vlasu.'],
+            ['title' => 'PREČO VIRTUOS PEROXIDE', 'body' => 'Je vytvorený ako súčasť profesionálneho systému Virtuos, aby farbe poskytol správne prostredie pre rovnomerné rozvinutie pigmentov a predvídateľný výsledok.'],
+        ],
+        'Peroxide 20 vol – 6 %' => [
+            ['title' => 'KEDY ZVOLIŤ 6 %', 'body' => 'Univerzálna voľba pre permanentné farbenie, krytie šedín a mierne zosvetlenie prirodzeného základu. Jeden z najpoužívanejších oxidantov pre každodennú salónnu koloristiku.'],
+            ['title' => 'ČO OČAKÁVAŤ', 'body' => 'Vyvážený výkon, dobré krytie a intenzívny farebný výsledok. Poskytuje dostatočnú oxidačnú silu pre široké spektrum farebných služieb bez potreby siahať po vyššej koncentrácii.'],
+            ['title' => 'PREČO VIRTUOS PEROXIDE', 'body' => 'Pre profesionála znamená spoľahlivý a univerzálny základ pre väčšinu receptúr Virtuos Color – od prirodzených odtieňov až po výraznejšie farebné zmeny.'],
+        ],
+        'Peroxide 30 vol – 9 %' => [
+            ['title' => 'KEDY ZVOLIŤ 9 %', 'body' => 'Pri farbení, kde je potrebné výraznejšie zosvetlenie prirodzeného pigmentu a väčší posun vo výške tónu.'],
+            ['title' => 'ČO OČAKÁVAŤ', 'body' => 'Vyššiu zosvetľovaciu silu a intenzívnejšiu prácu s prirodzeným základom vlasu. Vhodný pre svetlejšie cieľové odtiene a profesionálne receptúry vyžadujúce väčší lift.'],
+            ['title' => 'PREČO VIRTUOS PEROXIDE', 'body' => 'Dáva koloristovi väčší rozsah pri tvorbe svetlejších výsledkov a umožňuje pracovať s Virtuos Color aj pri náročnejších farebných transformáciách.'],
+        ],
+        'Peroxide 40 vol – 12 %' => [
+            ['title' => 'KEDY ZVOLIŤ 12 %', 'body' => 'Najvyššia oxidačná sila systému, určená pre špecifické profesionálne techniky a receptúry, pri ktorých je potrebné dosiahnuť maximálny možný lift.'],
+            ['title' => 'ČO OČAKÁVAŤ', 'body' => 'Výraznú zosvetľovaciu schopnosť a intenzívnu oxidáciu prirodzeného pigmentu. Je určený na cielené použitie podľa diagnózy vlasov a požadovaného výsledku.'],
+            ['title' => 'PREČO VIRTUOS PEROXIDE', 'body' => 'Rozširuje možnosti systému Virtuos o najvyšší výkon a dáva skúsenému koloristovi nástroj pre prípady, kde nižšie koncentrácie nestačia.'],
+        ],
+    ];
+
 }
