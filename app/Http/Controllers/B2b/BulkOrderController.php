@@ -29,13 +29,14 @@ class BulkOrderController extends Controller
 
         // Colour ranges with a shade picker → big "open the range" cards.
         $colorProducts = $pro->filter(fn ($p) => $p->hasShades())->values();
-        $rest = $pro->reject(fn ($p) => $p->hasShades());
+        // One card per product – sizes (S/M, 150 ml/1 l) are picked on the product page.
+        $rest = Product::dedupeSizeVariants($pro->reject(fn ($p) => $p->hasShades()));
 
         $proGroups = collect([
             'farba'    => ['title' => 'Farbenie a technika', 'sub' => 'rastlinné farbenie, tónovacie roztoky, ondulácia'],
             'melir'    => ['title' => 'Melíry',              'sub' => 'zosvetľovacie prášky a pasty'],
             'peroxidy' => ['title' => 'Peroxidy a aktivátory', 'sub' => 'oxidanty pre systémy Earth a Virtuos'],
-            'ostatne'  => ['title' => 'Ostatné pre salón',   'sub' => 'technická starostlivosť a vzorkovníky'],
+            'ostatne'  => ['title' => 'Doplnky a technika',  'sub' => 'vzorkovníky, tašky, misky, technická starostlivosť'],
         ])->map(function ($g, $key) use ($rest) {
             $g['products'] = $rest->filter(fn ($p) => match ($key) {
                 'farba', 'melir', 'peroxidy' => $p->type === $key,

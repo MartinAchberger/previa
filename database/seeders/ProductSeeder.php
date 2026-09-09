@@ -205,15 +205,7 @@ class ProductSeeder extends Seeder
                 ['Organic Aloe Waving Lotion 1', '200 ml', 27, true, 'tall', null],
                 ['Organic Aloe Waving Lotion 2', '200 ml', 27, true, 'tall', null],
             ],
-            'doplnky' => [
-                ['Vzorkovník Earth Powder Infusion', '—', 34, true, 'sachet', null],
-                ['Vzorkovník Earth Permanent Color', '—', 26, true, 'sachet', null],
-                ['Vzorkovník Virtuos Color', '—', 26, true, 'sachet', null],
-                ['Plátená taška S 19 × 25 cm – béžová', '—', 7, false, 'sachet', null],
-                ['Plátená taška L 38 × 42 cm – béžová', '—', 9, false, 'sachet', null],
-                ['Darčeková taška Premium L 36 × 12 × 31', '—', 9, false, 'sachet', null],
-                ['Darčeková taška ECO M 28 × 11 × 22', '—', 3, false, 'sachet', null],
-            ],
+            // 'doplnky' => finálny zoznam je v DoplnkySeeder (10. 9. 2026).
         ];
 
         $i = 0;
@@ -248,7 +240,8 @@ class ProductSeeder extends Seeder
             }
         }
 
-        // Finálne SK texty + zaradenie do ďalších kolekcií, featured výber atď.
+        // Doplnky (tašky, misky, vzorkovníky, kefy) + finálne SK texty, ďalšie kolekcie, featured výber.
+        $this->call(DoplnkySeeder::class);
         $this->call(ProductContentSeeder::class);
     }
 }

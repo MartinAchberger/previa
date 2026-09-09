@@ -248,6 +248,8 @@ class Product extends Model
         if (str_contains($name, 'shampoo') || str_contains($s, 'šampón')) return 'sampon';
         if (str_contains($name, 'treatment') && str_contains($s, 'maska') || str_contains($name, 'mask')) return 'maska';
         if (str_contains($name, 'conditioner') || str_contains($s, 'kondicionér')) return 'kondicioner';
+        // Accessories before the colour checks ("Vzorkovník Earth Powder Infusion" is a sampler, not a colour).
+        if (preg_match('/kefa|hrebeň|taška|miska|vzorkovník|brush|comb/u', $s)) return 'doplnky';
         // Professional technical range.
         if (preg_match('/bleach|melír|zosvetľ/u', $s)) return 'melir';
         if (preg_match('/peroxid|activator|aktivátor|oxidant/u', $s)) return 'peroxidy';
@@ -268,6 +270,7 @@ class Product extends Model
             'farba'       => 'Farby',
             'melir'       => 'Melíry',
             'peroxidy'    => 'Peroxidy a aktivátory',
+            'doplnky'     => 'Doplnky',
         ];
     }
 
@@ -281,7 +284,8 @@ class Product extends Model
     {
         if (!$this->b2b_only) return false;
         static $proLineIds = null;
-        $proLineIds ??= ProductLine::whereIn('slug', self::PRO_LINE_SLUGS)->pluck('id')->map(fn ($v) => (int) $v)->all();
+        // Salon-only accessories (bags, bowls, samplers) belong to PREVIA PRO too, even when they come in sizes.
+        $proLineIds ??= ProductLine::whereIn('slug', [...self::PRO_LINE_SLUGS, 'doplnky'])->pluck('id')->map(fn ($v) => (int) $v)->all();
         if ($this->line_id && in_array((int) $this->line_id, $proLineIds, true)) return true;
         return $this->variant_group === null;
     }
