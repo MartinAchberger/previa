@@ -124,11 +124,12 @@
 
             const sub = this.subtotal();
             const vat = sub - sub / 1.23;
-            const ship = sub >= 60 ? 0 : 4.90;
+            // Carrier is picked in the checkout – until then show the cheapest option (Packeta pickup point).
+            const ship = sub >= 60 ? 0 : 3.50;
             const tot = sub + ship;
             if (subEl)  subEl.textContent  = '€' + sub.toFixed(2).replace('.', ',');
             if (vatEl)  vatEl.textContent  = '€' + vat.toFixed(2).replace('.', ',');
-            if (shipEl) shipEl.textContent = ship === 0 ? 'zadarmo' : '€' + ship.toFixed(2).replace('.', ',');
+            if (shipEl) shipEl.textContent = ship === 0 ? 'zadarmo' : 'od €' + ship.toFixed(2).replace('.', ',');
             if (totEl)  totEl.textContent  = '€' + tot.toFixed(2).replace('.', ',');
         },
     };

@@ -100,7 +100,9 @@ class FoxlogService
             'shipping_email'      => $order->customer_email,
             'shipping_id'         => $order->shipping_carrier,   // carrier (Phase 3); null = home delivery
             'branch_id'           => $order->pickup_point_id,    // pickup point (Phase 3)
-            'note'                => $order->notes,
+            'note'                => $order->shipping_method === 'personal'
+                ? trim('OSOBNÝ ODBER V SKLADE – neposielať, zákazník si vyzdvihne osobne. ' . (string) $order->notes)
+                : $order->notes,
             'sale_items'          => $this->buildSaleItems($order),
         ], fn ($v) => $v !== null && $v !== '');
     }

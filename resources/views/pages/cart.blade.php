@@ -30,7 +30,7 @@
             <div class="cs-row"><span>Doprava</span><strong data-cart-ship>€0,00</strong></div>
             <div class="cs-row cs-row--big"><span>Celkom</span><strong data-cart-tot>€0,00</strong></div>
             <a href="{{ route('checkout.show') }}" class="btn cs-cta">Pokračovať na pokladňu →</a>
-            <p class="cs-note">Platba dobierkou alebo kartou online. Doprava zadarmo od €60.</p>
+            <p class="cs-note">Platba dobierkou alebo kartou online. Packeta výdajné miesto €3,50 · kuriér €4,50 · osobný odber v Bratislave zadarmo · doprava zadarmo od €60.</p>
         </aside>
     </div>
 </section>
@@ -87,11 +87,11 @@
 
         const sub = c.subtotal();
         const vat = sub - sub / 1.23;
-        const ship = sub >= 60 ? 0 : 4.90;
+        const ship = sub >= {{ (float) $freeShippingFrom }} ? 0 : {{ (float) $minShippingCost }};
         const tot = sub + ship;
         document.querySelector('[data-cart-sub]').textContent = fmt(sub);
         document.querySelector('[data-cart-vat]').textContent = fmt(vat);
-        document.querySelector('[data-cart-ship]').textContent = ship === 0 ? 'zadarmo' : fmt(ship);
+        document.querySelector('[data-cart-ship]').textContent = ship === 0 ? 'zadarmo' : 'od ' + fmt(ship);
         document.querySelector('[data-cart-tot]').textContent = fmt(tot);
     }
 

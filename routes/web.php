@@ -18,6 +18,9 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/eshop', [ShopController::class, 'index'])->name('shop.index');
 Route::get('/produkt/{slug}', [ProductController::class, 'show'])->name('product.show');
 Route::view('/filozofia', 'pages.filozofia')->name('philosophy.show');
+Route::view('/dorucenie-a-vratenie', 'pages.dorucenie')->name('delivery.show');
+Route::view('/faq', 'pages.faq')->name('faq.show');
+Route::view('/kontakt', 'pages.kontakt')->name('contact.show');
 Route::get('/diagnostika', [HairQuizController::class, 'show'])->name('quiz.show');
 Route::post('/diagnostika', [HairQuizController::class, 'result'])
     ->middleware('throttle:20,1')

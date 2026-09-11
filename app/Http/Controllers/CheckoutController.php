@@ -23,14 +23,51 @@ use Throwable;
 
 class CheckoutController extends Controller
 {
-    public const SHIPPING_COST = 4.90;
     public const FREE_SHIPPING_FROM = 60;
+
+    /**
+     * Delivery options – cenník klienta (9/2026). Key = carrier code stored on the
+     * order and sent to Foxlog as shipping_id. Free shipping from FREE_SHIPPING_FROM
+     * applies to every option.
+     */
+    public const DELIVERY_OPTIONS = [
+        'zasielkovna'  => ['label' => 'Packeta – výdajné miesto',    'desc' => 'Vyzdvihnutie na výdajnom mieste Packeta.',              'cost' => 3.50, 'type' => 'pickup'],
+        'packeta'      => ['label' => 'Packeta – kuriér na adresu',  'desc' => 'Doručenie kuriérom Packeta v rámci SR.',                'cost' => 4.50, 'type' => 'courier'],
+        'gls'          => ['label' => 'GLS – kuriér na adresu',      'desc' => 'Doručenie kuriérom GLS v rámci SR.',                    'cost' => 4.50, 'type' => 'courier'],
+        'dpd'          => ['label' => 'DPD – kuriér na adresu',      'desc' => 'Doručenie kuriérom DPD v rámci SR.',                    'cost' => 4.50, 'type' => 'courier'],
+        'osobny-odber' => ['label' => 'Osobný odber v Bratislave',   'desc' => 'Foxlog Warehouse, Stará Vajnorská 11 · pracovné dni 8:00 – 15:30. Počkajte na potvrdenie, že je objednávka pripravená.', 'cost' => 0, 'type' => 'personal'],
+    ];
+
+    /** Options offered right now (the Packeta pickup point needs the widget key). */
+    public static function deliveryOptions(): array
+    {
+        $options = self::DELIVERY_OPTIONS;
+        if (!filled(config('services.packeta.api_key'))) {
+            unset($options['zasielkovna']);
+        }
+        return $options;
+    }
+
+    /** Cheapest paid option – what the cart shows before a carrier is chosen. */
+    public static function minShippingCost(): float
+    {
+        return (float) min(array_column(array_filter(self::deliveryOptions(), fn ($o) => $o['cost'] > 0), 'cost'));
+    }
+
+    public static function shippingCostFor(string $choice, float $subtotal): float
+    {
+        if ($subtotal >= self::FREE_SHIPPING_FROM) {
+            return 0.0;
+        }
+        return (float) (self::deliveryOptions()[$choice]['cost'] ?? self::minShippingCost());
+    }
 
     public function show(): View
     {
         $b2b = Auth::guard('b2b')->user();
         return view('pages.checkout', [
-            'shippingCost'    => self::SHIPPING_COST,
+            'deliveryOptions'  => self::deliveryOptions(),
+            'minShippingCost'  => self::minShippingCost(),
             'freeShippingFrom' => self::FREE_SHIPPING_FROM,
             'b2b' => $b2b,
             // Pay-by-invoice is offered only to approved salons that have no
@@ -65,22 +102,21 @@ class CheckoutController extends Controller
 
         $isCompany = $b2b ? true : $request->boolean('is_company_purchase');
 
-        // Delivery: choose a carrier. Zásielkovňa = pickup point (only if the
-        // Packeta widget key is configured); GLS / DPD = courier to address.
-        $allowedCarriers = ['gls', 'dpd'];
-        if (filled(config('services.packeta.api_key'))) {
-            $allowedCarriers[] = 'zasielkovna';
-        }
-        $choice = $request->input('delivery_choice');
-        $isPickup = $choice === 'zasielkovna';
-        $shipSame = !$isPickup && $request->boolean('shipping_same_as_billing');
+        // Delivery: pickup point (Packeta widget), courier to address, or personal
+        // pickup at the warehouse (no delivery address needed).
+        $deliveryOptions = self::deliveryOptions();
+        $choice = (string) $request->input('delivery_choice');
+        $deliveryType = $deliveryOptions[$choice]['type'] ?? 'courier';
+        $isPickup   = $deliveryType === 'pickup';
+        $isPersonal = $deliveryType === 'personal';
+        $shipSame = !$isPickup && !$isPersonal && $request->boolean('shipping_same_as_billing');
 
         $rules = [
             'customer_name'    => 'required|string|max:150',
             'customer_email'   => 'required|email|max:150',
             'customer_phone'   => 'required|string|max:40',
             'payment_method'   => 'required|in:cod,card,transfer',
-            'delivery_choice'  => 'required|in:' . implode(',', $allowedCarriers),
+            'delivery_choice'  => 'required|in:' . implode(',', array_keys($deliveryOptions)),
             'notes'            => 'nullable|string|max:1000',
             'items'            => 'required|array|min:1',
             'items.*.id'       => 'required|string|max:80',
@@ -106,6 +142,8 @@ class CheckoutController extends Controller
             $rules['shipping_city']     = 'nullable|string|max:100';
             $rules['shipping_zip']      = 'nullable|string|max:16';
             $rules['shipping_country']  = 'nullable|string|max:2';
+        } elseif ($isPersonal) {
+            // Customer collects at the warehouse – no delivery address.
         } elseif (!$shipSame) {
             $rules['shipping_address'] = 'required|string|max:200';
             $rules['shipping_city']    = 'required|string|max:100';
@@ -125,10 +163,15 @@ class CheckoutController extends Controller
             }
         }
 
-        $shippingMethod  = $isPickup ? 'pickup' : 'courier';
-        $shippingCarrier = $choice; // zasielkovna | gls | dpd
+        $shippingMethod  = $isPickup ? 'pickup' : ($isPersonal ? 'personal' : 'courier');
+        $shippingCarrier = $choice; // zasielkovna | packeta | gls | dpd | osobny-odber
 
-        if ($isPickup) {
+        if ($isPersonal) {
+            $data['shipping_address'] = 'Osobný odber – Foxlog Warehouse, Stará Vajnorská 11';
+            $data['shipping_city']    = 'Bratislava';
+            $data['shipping_zip']     = '83104';
+            $data['shipping_country'] = 'SK';
+        } elseif ($isPickup) {
             // Delivery goes to the chosen pickup point — store its label/address.
             $data['shipping_address'] = $data['pickup_point_name'];
             $data['shipping_city']    = $data['shipping_city'] ?? '';
@@ -211,7 +254,7 @@ class CheckoutController extends Controller
 
         $subtotalBeforeDiscount = round($subtotalBeforeDiscount, 2);
         $discountValue = round($subtotalBeforeDiscount - $subtotal, 2);
-        $shipping = $subtotal >= self::FREE_SHIPPING_FROM ? 0 : self::SHIPPING_COST;
+        $shipping = self::shippingCostFor($choice, $subtotal);
         $total = round($subtotal + $shipping, 2);
 
         $order = DB::transaction(function () use ($data, $lines, $subtotalBeforeDiscount, $discountValue, $shipping, $total, $discountPct, $b2b, $isCompany, $shippingMethod, $shippingCarrier) {

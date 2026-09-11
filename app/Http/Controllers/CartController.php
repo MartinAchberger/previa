@@ -8,6 +8,9 @@ class CartController extends Controller
 {
     public function show(): View
     {
-        return view('pages.cart');
+        return view('pages.cart', [
+            'freeShippingFrom' => \App\Http\Controllers\CheckoutController::FREE_SHIPPING_FROM,
+            'minShippingCost'  => \App\Http\Controllers\CheckoutController::minShippingCost(),
+        ]);
     }
 }

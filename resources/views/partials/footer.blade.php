@@ -29,9 +29,9 @@
         <div>
             <h4>Pomoc</h4>
             <ul>
-                <li>Doprava &amp; vrátenie</li>
-                <li>FAQ</li>
-                <li>Kontakt</li>
+                <li><a href="{{ route('delivery.show') }}">Doručenie a vrátenie</a></li>
+                <li><a href="{{ route('faq.show') }}">FAQ</a></li>
+                <li><a href="{{ route('contact.show') }}">Kontakt</a></li>
             </ul>
         </div>
         <div>

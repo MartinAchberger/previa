@@ -158,29 +158,16 @@
 
             <div class="ck-grp">
                 <h3>Doprava</h3>
-                @if (!empty($packetaKey))
+                @php($deliveryDefault = old('delivery_choice', array_key_exists('gls', $deliveryOptions) ? 'gls' : array_key_first($deliveryOptions)))
+                @foreach ($deliveryOptions as $code => $opt)
                 <div class="ck-method">
-                    <input type="radio" id="dv-zas" name="delivery_choice" value="zasielkovna" @checked(old('delivery_choice') === 'zasielkovna')>
-                    <label for="dv-zas">
-                        <strong>Zásielkovňa – výdajné miesto</strong>
-                        <small>Vyzdvihnutie na výdajnom mieste. Zadarmo od €60.</small>
+                    <input type="radio" id="dv-{{ $code }}" name="delivery_choice" value="{{ $code }}" data-ship-cost="{{ $opt['cost'] }}" data-ship-type="{{ $opt['type'] }}" @checked($deliveryDefault === $code)>
+                    <label for="dv-{{ $code }}">
+                        <strong>{{ $opt['label'] }} <span class="ck-method-price">{{ $opt['cost'] > 0 ? '€' . number_format($opt['cost'], 2, ',', ' ') : 'zadarmo' }}</span></strong>
+                        <small>{{ $opt['desc'] }}{{ $opt['cost'] > 0 ? ' Zadarmo od €' . $freeShippingFrom . '.' : '' }}</small>
                     </label>
                 </div>
-                @endif
-                <div class="ck-method">
-                    <input type="radio" id="dv-gls" name="delivery_choice" value="gls" @checked(old('delivery_choice', 'gls') === 'gls')>
-                    <label for="dv-gls">
-                        <strong>GLS – doručenie na adresu</strong>
-                        <small>Doručenie kuriérom GLS v rámci SR. Zadarmo od €60.</small>
-                    </label>
-                </div>
-                <div class="ck-method">
-                    <input type="radio" id="dv-dpd" name="delivery_choice" value="dpd" @checked(old('delivery_choice') === 'dpd')>
-                    <label for="dv-dpd">
-                        <strong>DPD – doručenie na adresu</strong>
-                        <small>Doručenie kuriérom DPD v rámci SR. Zadarmo od €60.</small>
-                    </label>
-                </div>
+                @endforeach
                 @if (!empty($packetaKey))
                 <div id="pickup-point-block" hidden style="margin:4px 0 8px;padding:14px;border:1px solid var(--line)">
                     <button type="button" class="btn" id="pickup-pick-btn" style="margin-bottom:10px">Vybrať výdajné miesto →</button>
@@ -259,6 +246,8 @@
 <script>
 (function () {
     const DISCOUNT_PCT = {{ $b2b->discount_pct ?? 0 }};
+    const FREE_FROM = {{ (float) $freeShippingFrom }};
+    const MIN_SHIP = {{ (float) $minShippingCost }};
     function fmt(n) { return '€' + n.toFixed(2).replace('.', ','); }
     // Item data comes from localStorage / admin-set product names — escape before render.
     function esc(s) {
@@ -289,7 +278,9 @@
 
         const sub = c.subtotal();
         const vat = sub - sub / 1.23;
-        const ship = sub >= 60 ? 0 : 4.90;
+        const chosen = document.querySelector('input[name="delivery_choice"]:checked');
+        const shipCost = chosen ? parseFloat(chosen.dataset.shipCost || '0') : MIN_SHIP;
+        const ship = sub >= FREE_FROM ? 0 : shipCost;
         const tot = sub + ship;
         document.querySelector('[data-ck-sub]').textContent = fmt(sub);
         document.querySelector('[data-ck-vat]').textContent = fmt(vat);
@@ -348,13 +339,17 @@
         container.querySelectorAll('input, select').forEach(el => { el.disabled = !enabled; });
     }
 
-    function isPickupChoice() {
-        return document.querySelector('input[name="delivery_choice"]:checked')?.value === 'zasielkovna';
+    function deliveryType() {
+        return document.querySelector('input[name="delivery_choice"]:checked')?.dataset.shipType || 'courier';
     }
+    function isPickupChoice() { return deliveryType() === 'pickup'; }
     function syncShippingMethod() {
-        const pickup = isPickupChoice();
-        if (addressGrp) { addressGrp.hidden = pickup; setInputs(addressGrp, !pickup); }
+        const type = deliveryType();
+        const pickup = type === 'pickup';
+        const noAddress = pickup || type === 'personal';
+        if (addressGrp) { addressGrp.hidden = noAddress; setInputs(addressGrp, !noAddress); }
         if (pickupBlock) { pickupBlock.hidden = !pickup; setInputs(pickupBlock, pickup); }
+        render(); // shipping cost depends on the chosen carrier
     }
     document.querySelectorAll('input[name="delivery_choice"]').forEach(el => el.addEventListener('change', syncShippingMethod));
     document.addEventListener('DOMContentLoaded', syncShippingMethod);

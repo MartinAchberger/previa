@@ -389,8 +389,8 @@
         @endif
 
         <div class="meta-list">
-            <div class="li"><div class="k">Doručenie</div><div class="v">Expresne v rámci SR · zadarmo od €60</div><div class="ic">→</div></div>
-            <div class="li"><div class="k">Vrátenie</div><div class="v">30 dní · bez otázok</div><div class="ic">→</div></div>
+            <a href="{{ route('delivery.show') }}" class="li" style="text-decoration:none;color:inherit"><div class="k">Doručenie</div><div class="v">1 – 3 pracovné dni · zadarmo od €60</div><div class="ic">→</div></a>
+            <a href="{{ route('delivery.show') }}#vratenie" class="li" style="text-decoration:none;color:inherit"><div class="k">Vrátenie</div><div class="v">Odstúpenie do 14 dní od prevzatia</div><div class="ic">→</div></a>
             {{-- <div class="li"><div class="k">Diagnostika</div><div class="v">Pasuje to k vašim vlasom?</div><div class="ic">→</div></div> --}}
             <div class="li"><div class="k">Pre salóny</div><div class="v">Cena pre salóny · litrové balenie</div><div class="ic">→</div></div>
         </div>
