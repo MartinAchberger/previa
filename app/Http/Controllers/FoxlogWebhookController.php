@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Support\AdminNotifier;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
@@ -44,16 +45,38 @@ class FoxlogWebhookController extends Controller
             return response()->json(['error' => 'Invalid payload'], 422);
         }
 
+        $threshold = (int) config('services.foxlog.low_stock_threshold', 3);
         $updated = 0;
         $unknown = [];
+        $lowNow = [];
         foreach ($payload as $sku => $level) {
             if (!is_scalar($sku) || !is_numeric($level)) {
                 continue;
             }
-            $affected = Product::withoutGlobalScopes()
-                ->where('sku', (string) $sku)
-                ->update(['stock' => (int) $level]);
-            $affected > 0 ? $updated++ : $unknown[] = (string) $sku;
+            $level = (int) $level;
+            $products = Product::withoutGlobalScopes()->where('sku', (string) $sku)->get(['id', 'name', 'volume', 'stock', 'published']);
+            if ($products->isEmpty()) {
+                $unknown[] = (string) $sku;
+                continue;
+            }
+            $updated++;
+            foreach ($products as $product) {
+                // Alert once, when the level crosses the threshold downwards (not on every sync).
+                $wasLow = $product->stock !== null && (int) $product->stock <= $threshold;
+                if ($product->published && $level <= $threshold && !$wasLow) {
+                    $lowNow[] = trim($product->name . ' ' . ($product->volume ?: '')) . ' (SKU ' . $sku . '): ' . ($level <= 0 ? 'vypredané' : $level . ' ks');
+                }
+            }
+            Product::withoutGlobalScopes()->where('sku', (string) $sku)->update(['stock' => $level]);
+        }
+
+        if (!empty($lowNow)) {
+            AdminNotifier::alert(
+                count($lowNow) === 1 ? 'Nízky stav skladu: ' . $lowNow[0] : 'Nízky stav skladu (' . count($lowNow) . ' produktov)',
+                'Sklad hlási, že tieto produkty klesli na ' . $threshold . ' ks alebo menej. Vypredané produkty sa v eshope zobrazujú ako nedostupné.',
+                ['Produkty' => implode("\n", $lowNow)],
+                route('platform.products'),
+            );
         }
 
         return response()->json(['updated' => $updated, 'unknown_skus' => $unknown]);

@@ -91,6 +91,20 @@ class Order extends Model
         return self::STATUSES[$this->status] ?? $this->status;
     }
 
+    /** Human label of the chosen delivery option (admin mail, confirmation). */
+    public function deliveryLabel(): string
+    {
+        $opt = \App\Http\Controllers\CheckoutController::DELIVERY_OPTIONS[$this->shipping_carrier] ?? null;
+        if ($opt) {
+            return $opt['label'];
+        }
+        return match ($this->shipping_method) {
+            'pickup'   => 'Výdajné miesto',
+            'personal' => 'Osobný odber v Bratislave',
+            default    => 'Kuriér',
+        };
+    }
+
     public function paymentLabel(): string
     {
         return self::PAYMENT_LABELS[$this->payment_method] ?? $this->payment_method;

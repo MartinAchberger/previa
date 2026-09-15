@@ -19,6 +19,23 @@ class MailTest extends Command
         $this->line('Mailer:  ' . config('mail.default'));
         $this->line('From:    ' . config('mail.from.address') . ' (' . config('mail.from.name') . ')');
         $this->line('To:      ' . $to);
+        $this->line('Admin:   ' . config('mail.admin_address') . '  (MAIL_ADMIN_ADDRESS — sem chodia notifikácie o objednávkach a registráciách)');
+        $this->line('Queue:   ' . config('queue.default'));
+
+        // Order / registration e-mails are queued. Without a running worker they
+        // pile up in the jobs table and nobody gets them — make that visible.
+        if (config('queue.default') !== 'sync') {
+            try {
+                $pending = \Illuminate\Support\Facades\DB::table('jobs')->count();
+                $failed  = \Illuminate\Support\Facades\DB::table('failed_jobs')->count();
+                $this->line('Jobs:    ' . $pending . ' čakajúcich · ' . $failed . ' zlyhaných');
+                if ($pending > 0) {
+                    $this->warn('Vo fronte čakajú e-maily — na serveri pravdepodobne nebeží queue worker (Forge → Queue), alebo nastavte QUEUE_CONNECTION=sync.');
+                }
+            } catch (Throwable $e) {
+                $this->warn('Tabuľky jobs/failed_jobs sa nepodarilo prečítať: ' . $e->getMessage());
+            }
+        }
 
         try {
             // Sent synchronously (no queue) so the result is visible immediately.

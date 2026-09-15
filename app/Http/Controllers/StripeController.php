@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Support\AdminNotifier;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
@@ -185,6 +186,12 @@ class StripeController extends Controller
                 'error' => $e->getMessage(),
             ]);
             $sf->recordError($order, $e);
+            AdminNotifier::alert(
+                'Faktúra k zaplatenej objednávke ' . $order->order_number . ' sa nevystavila',
+                'Platba kartou prebehla, ale SuperFaktúra faktúru nevystavila. Zákazník nedostal doklad — vystavte faktúru znova z administrácie.',
+                ['Objednávka' => $order->order_number, 'Zákazník' => $order->customer_name, 'Suma' => $order->totalFormatted(), 'Chyba' => mb_substr($e->getMessage(), 0, 500)],
+                route('platform.orders.view', $order->id),
+            );
             return;
         }
 

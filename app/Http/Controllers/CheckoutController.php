@@ -16,6 +16,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Support\AdminNotifier;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
@@ -380,6 +381,12 @@ class CheckoutController extends Controller
         } catch (Throwable $e) {
             Log::error('SuperFaktura transfer invoice issue failed', ['order' => $order->order_number, 'error' => $e->getMessage()]);
             $sf->recordError($order, $e);
+            AdminNotifier::alert(
+                'Faktúra k objednávke ' . $order->order_number . ' sa nevystavila',
+                'Objednávka na faktúru prešla, ale SuperFaktúra faktúru nevystavila. Salón nedostal faktúru — vystavte ju znova z administrácie.',
+                ['Objednávka' => $order->order_number, 'Salón' => $order->company_name ?: $order->customer_name, 'Suma' => $order->totalFormatted(), 'Chyba' => mb_substr($e->getMessage(), 0, 500)],
+                route('platform.orders.view', $order->id),
+            );
             return;
         }
 

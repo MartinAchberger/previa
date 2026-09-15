@@ -5,6 +5,7 @@ namespace App\Services\Foxlog;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Support\Facades\Http;
+use App\Support\AdminNotifier;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -51,6 +52,12 @@ class FoxlogService
             $order->forceFill(['foxlog_status' => 'cancelled'])->save();
         } catch (Throwable $e) {
             Log::error('Foxlog cancel failed', ['order' => $order->order_number, 'error' => $e->getMessage()]);
+            AdminNotifier::alert(
+                'Storno objednávky ' . $order->order_number . ' sa nedostalo do skladu',
+                'Objednávka bola zrušená v eshope, ale zrušenie vo Foxlogu zlyhalo. Sklad ju môže odoslať — zrušte ju vo Foxlogu ručne.',
+                ['Objednávka' => $order->order_number, 'Chyba' => mb_substr($e->getMessage(), 0, 500)],
+                route('platform.orders.view', $order->id),
+            );
         }
     }
 
@@ -77,6 +84,12 @@ class FoxlogService
         } catch (Throwable $e) {
             Log::error('Foxlog send failed', ['order' => $order->order_number, 'error' => $e->getMessage()]);
             $order->forceFill(['foxlog_status' => 'error'])->save();
+            AdminNotifier::alert(
+                'Objednávka ' . $order->order_number . ' sa neodoslala do skladu',
+                'Odoslanie objednávky do Foxlogu zlyhalo. Sklad o nej nevie — treba ju odoslať znova z administrácie alebo zadať vo Foxlogu ručne.',
+                ['Objednávka' => $order->order_number, 'Zákazník' => $order->customer_name, 'Chyba' => mb_substr($e->getMessage(), 0, 500)],
+                route('platform.orders.view', $order->id),
+            );
         }
     }
 

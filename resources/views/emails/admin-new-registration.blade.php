@@ -8,6 +8,7 @@
         <tr><td style="padding:3px 0;color:#8a857b;">E-mail</td><td style="padding:3px 0;">{{ $user->email }}</td></tr>
         <tr><td style="padding:3px 0;color:#8a857b;">Telefón</td><td style="padding:3px 0;">{{ $user->phone ?: '—' }}</td></tr>
         <tr><td style="padding:3px 0;color:#8a857b;">IČO / IČ DPH</td><td style="padding:3px 0;">{{ $user->ico ?: '—' }} / {{ $user->vat_id ?: '—' }}</td></tr>
+        <tr><td style="padding:3px 0;color:#8a857b;">Adresa</td><td style="padding:3px 0;">{{ trim(($user->address ?: '') . ', ' . ($user->zip ?: '') . ' ' . ($user->city ?: ''), ', ') ?: '—' }}</td></tr>
     </table>
     <p style="margin:0;font-size:13px;"><a href="{{ route('platform.b2b-users') }}" style="color:#12110f;">Otvoriť v administrácii →</a></p>
 @endsection
