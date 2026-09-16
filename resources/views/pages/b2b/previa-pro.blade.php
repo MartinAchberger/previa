@@ -27,7 +27,6 @@
     <section class="bulk-lines" id="pro-farby">
         <div class="section-head">
             <h2 class="h2">Farby <em>· celá paleta odtieňov.</em></h2>
-            <div class="section-sub">Otvor radu, vyber odtiene a množstvá naraz a jedným tlačidlom ich pridaj do košíka.</div>
         </div>
         <div class="grid-4">
             @foreach ($colorProducts as $cp)

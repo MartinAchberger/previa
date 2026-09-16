@@ -103,10 +103,7 @@
             </div>
 
             <div class="grp shop-fil-quiz">
-                <a href="{{ route('quiz.show') }}" class="shop-fil-quiz-link">
-                    <span class="eyebrow-sm">Diagnostika · 60 sekúnd</span>
-                    <strong>Nájdite rutinu pre svoje vlasy →</strong>
-                </a>
+                <a href="{{ route('quiz.show') }}" class="shop-fil-quiz-link">Nájdite rutinu pre svoje vlasy →</a>
             </div>
         </div>
     </aside>

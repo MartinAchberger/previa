@@ -32,7 +32,6 @@
             @elseif($p->badge)
                 <div class="badge">{{ $p->badge }}</div>
             @endif
-            <div class="no">n° {{ $p->code }}</div>
         </div>
         <div class="line">{{ $p->line_label }}</div>
         <div class="name">{{ $p->name }}</div>

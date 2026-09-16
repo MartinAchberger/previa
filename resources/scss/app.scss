@@ -1204,10 +1204,8 @@ input.is-invalid, select.is-invalid, textarea.is-invalid { border-color: #a4392f
 .shop-search button { border: 0; border-left: 1px solid var(--line); background: transparent; padding: 0 18px; font: inherit; font-size: 16px; color: var(--ink); cursor: pointer; transition: background .15s, color .15s; }
 .shop-search button:hover { background: var(--ink); color: var(--bg); }
 .shop-fil-quiz { padding-top: 4px; }
-.shop-fil-quiz-link { display: flex; flex-direction: column; gap: 6px; padding: 18px 20px; border: 1px solid var(--line); text-decoration: none; color: inherit; transition: background .15s; }
-.shop-fil-quiz-link:hover { background: var(--bg-2); }
-.shop-fil-quiz-link .eyebrow-sm { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--mute); }
-.shop-fil-quiz-link strong { font-weight: 500; font-size: 14px; letter-spacing: -0.01em; }
+.shop-fil-quiz-link { display: block; padding: 9px 0; font-size: 14px; font-weight: 500; letter-spacing: -0.01em; text-decoration: none; color: var(--ink); }
+.shop-fil-quiz-link:hover { text-decoration: underline; text-underline-offset: 4px; }
 .shop-fil .opt--pro .lab { font-weight: 500; letter-spacing: 0.02em; }
 @media (max-width: 1100px) {
   .shop-head .meta { flex-direction: column; align-items: stretch; gap: 20px; }
@@ -1287,3 +1285,7 @@ input.is-invalid, select.is-invalid, textarea.is-invalid { border-color: #a4392f
 .ck-method-price { float: right; font-weight: 500; color: var(--mute); font-size: 13px; letter-spacing: 0.02em; }
 /* info pages are plain content – keep their headings out of the scroll-reveal fade */
 .reveal-host .info-block h2, .reveal-host .contact-card h2 { opacity: 1; transform: none; }
+
+/* shop header: keep the one-sentence description on a single line on desktop */
+.shop-head .meta .ds { max-width: none; white-space: nowrap; }
+@media (max-width: 1100px) { .shop-head .meta .ds { white-space: normal; } }

@@ -5738,31 +5738,18 @@ input.is-invalid, select.is-invalid, textarea.is-invalid {
 }
 
 .shop-fil-quiz-link {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 18px 20px;
-  border: 1px solid var(--line);
+  display: block;
+  padding: 9px 0;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
   text-decoration: none;
-  color: inherit;
-  transition: background 0.15s;
+  color: var(--ink);
 }
 
 .shop-fil-quiz-link:hover {
-  background: var(--bg-2);
-}
-
-.shop-fil-quiz-link .eyebrow-sm {
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--mute);
-}
-
-.shop-fil-quiz-link strong {
-  font-weight: 500;
-  font-size: 14px;
-  letter-spacing: -0.01em;
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .shop-fil .opt--pro .lab {
@@ -6155,4 +6142,16 @@ input.is-invalid, select.is-invalid, textarea.is-invalid {
 .reveal-host .info-block h2, .reveal-host .contact-card h2 {
   opacity: 1;
   transform: none;
+}
+
+/* shop header: keep the one-sentence description on a single line on desktop */
+.shop-head .meta .ds {
+  max-width: none;
+  white-space: nowrap;
+}
+
+@media (max-width: 1100px) {
+  .shop-head .meta .ds {
+    white-space: normal;
+  }
 }

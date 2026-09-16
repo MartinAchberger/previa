@@ -323,9 +323,7 @@ class ProductContentSeeder extends Seeder
             'subtitle'    => 'Kompletná rutina na podporu rastu vlasov',
             'description' => 'Dvojkroková intenzívna starostlivosť vytvorená pre oslabené vlasy so sklonom k rednutiu a vypadávaniu. Spája Regrowth Shampoo s koncentrovaným Hair Regrowth Treatment, čím pôsobí na vlasovú pokožku počas umývania aj po ňom. Pomáha podporovať prirodzený rastový cyklus vlasov, vitalitu vlasovej pokožky a podmienky pre rast silnejších a hustejšie pôsobiacich vlasov.
 
-Balenie obsahuje:
-
-Regrowth Shampoo 350 ml + Hair Regrowth Treatment 100 ml',
+Balenie obsahuje: Regrowth Shampoo 350 ml + Hair Regrowth Treatment 100 ml',
             'for_whom'    => [
                 'vlasy so sklonom k zvýšenému vypadávaniu',
                 'rednúce a oslabené vlasy',
