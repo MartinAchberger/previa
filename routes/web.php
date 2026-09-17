@@ -21,6 +21,9 @@ Route::view('/filozofia', 'pages.filozofia')->name('philosophy.show');
 Route::view('/dorucenie-a-vratenie', 'pages.dorucenie')->name('delivery.show');
 Route::view('/faq', 'pages.faq')->name('faq.show');
 Route::view('/kontakt', 'pages.kontakt')->name('contact.show');
+Route::view('/cookies', 'pages.cookies')->name('cookies.show');
+Route::view('/obchodne-podmienky', 'pages.obchodne-podmienky')->name('terms.show');
+Route::view('/zasady-spracovania-osobnych-udajov', 'pages.osobne-udaje')->name('privacy.show');
 Route::get('/diagnostika', [HairQuizController::class, 'show'])->name('quiz.show');
 Route::post('/diagnostika', [HairQuizController::class, 'result'])
     ->middleware('throttle:20,1')

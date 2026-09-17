@@ -58,6 +58,11 @@ return [
         'low_stock_threshold' => (int) env('FOXLOG_LOW_STOCK_THRESHOLD', 3),
     ],
 
+    'cookiebot' => [
+        // Cookiebot Domain Group ID (Cookiebot admin → Settings → Your scripts). Empty = banner off.
+        'cbid' => env('COOKIEBOT_CBID'),
+    ],
+
     'packeta' => [
         // Zásielkovňa / Packeta pickup-point widget API key (from the Packeta account).
         'api_key' => env('PACKETA_API_KEY'),

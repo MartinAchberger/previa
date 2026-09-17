@@ -119,6 +119,7 @@ class CheckoutController extends Controller
             'payment_method'   => 'required|in:cod,card,transfer',
             'delivery_choice'  => 'required|in:' . implode(',', array_keys($deliveryOptions)),
             'notes'            => 'nullable|string|max:1000',
+            'terms'            => 'accepted',
             'items'            => 'required|array|min:1',
             'items.*.id'       => 'required|string|max:80',
             'items.*.qty'      => 'required|integer|min:1|max:99',
@@ -152,7 +153,9 @@ class CheckoutController extends Controller
             $rules['shipping_country'] = 'required|string|max:2';
         }
 
-        $data = $request->validate($rules);
+        $data = $request->validate($rules, [
+            'terms.accepted' => 'Pre odoslanie objednávky je potrebné súhlasiť s obchodnými podmienkami.',
+        ]);
 
         // Pay-by-invoice is B2B-only and blocked while an unpaid invoice order is open.
         if ($data['payment_method'] === 'transfer') {

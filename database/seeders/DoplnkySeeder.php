@@ -58,6 +58,7 @@ class DoplnkySeeder extends Seeder
                 'line_id'        => $line->id,
                 'extra_line_ids' => array_values(array_filter($extra)),
                 'code'           => str_pad((string) ++$code, 3, '0', STR_PAD_LEFT),
+                'sku'            => str_pad((string) $code, 3, '0', STR_PAD_LEFT), // warehouse SKU = catalog code (Foxlog pairs on their side)
                 'variant_group'  => $group,
                 'name'           => $name,
                 'subtitle'       => $subtitle,

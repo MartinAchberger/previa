@@ -47,9 +47,9 @@
     <div class="ft-bot">
         <span>© {{ date('Y') }} PREVIA Slovensko</span>
         <div class="links">
-            <span>Obchodné podmienky</span>
-            <span>GDPR</span>
-            <span>Cookies</span>
+            <a href="{{ route('terms.show') }}">Obchodné podmienky</a>
+            <a href="{{ route('privacy.show') }}">Zásady spracovania osobných údajov</a>
+            <a href="{{ route('cookies.show') }}">Cookies</a>
         </div>
     </div>
 </footer>

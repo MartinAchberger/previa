@@ -233,15 +233,20 @@
                 <div class="ck-trow"><span>Doprava</span><strong data-ck-ship>€0,00</strong></div>
                 <div class="ck-trow ck-trow--big"><span>Celkom</span><strong data-ck-tot>€0,00</strong></div>
             </div>
+            <label class="ck-consent">
+                <input type="checkbox" name="terms" value="1" required @checked(old('terms'))>
+                <span>Oboznámil/a som sa s <a href="{{ route('terms.show') }}" target="_blank" rel="noopener">obchodnými podmienkami</a> a súhlasím s nimi.</span>
+            </label>
+            @error('terms')<p class="ck-note" style="color:#b3261e">{{ $message }}</p>@enderror
             <button type="submit" class="btn ck-submit" id="ck-submit">Odoslať objednávku - dobierka</button>
-            <p class="ck-note">Odoslaním súhlasíte s obchodnými podmienkami a spracovaním osobných údajov.</p>
+            <p class="ck-note">Osobné údaje spracúvame v rozsahu potrebnom na vybavenie objednávky podľa <a href="{{ route('privacy.show') }}" target="_blank" rel="noopener" style="color:inherit">Zásad spracovania osobných údajov</a>.</p>
         </aside>
     </section>
 </form>
 
 @push('scripts')
 @if (!empty($packetaKey))
-<script src="https://widget.packeta.com/v6/www/js/library.js"></script>
+<script src="https://widget.packeta.com/v6/www/js/library.js" data-cookieconsent="ignore"></script>
 @endif
 <script>
 (function () {
