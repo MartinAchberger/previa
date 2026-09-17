@@ -6208,3 +6208,8 @@ input.is-invalid, select.is-invalid, textarea.is-invalid {
     white-space: normal;
   }
 }
+/* legal & FAQ pages (single column): centre the content column instead of hugging the left edge */
+.info-body--single .info-content {
+  margin: 0 auto;
+  width: 100%;
+}
