@@ -22,8 +22,6 @@
             <ul>
                 <li><a href="{{ route('philosophy.show') }}">Filozofia</a></li>
                 <li><a href="{{ route('quiz.show') }}">Diagnostika vlasov</a></li>
-                <li>Vegan &amp; cruelty-free</li>
-                <li>Eco-friendly obaly</li>
             </ul>
         </div>
         <div>
@@ -39,8 +37,6 @@
             <ul>
                 <li><a href="{{ route('b2b.register') }}">Získať prístup pre salón</a></li>
                 <li><a href="{{ route('b2b.login') }}">Prihlásenie</a></li>
-                <li>Veľkoobchodný cenník</li>
-                <li>Edukácia</li>
             </ul>
         </div>
     </div>
