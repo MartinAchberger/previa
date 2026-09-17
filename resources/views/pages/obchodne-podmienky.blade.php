@@ -5,7 +5,7 @@
 
 @section('content')
 
-<section class="shop-head">
+<section class="shop-head shop-head--doc">
     <div class="crumbs">
         <a href="{{ route('home') }}" style="color:inherit;text-decoration:none">PREVIA</a>
         <span class="sep">/</span>
