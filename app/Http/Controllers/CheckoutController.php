@@ -32,8 +32,8 @@ class CheckoutController extends Controller
      * applies to every option.
      */
     public const DELIVERY_OPTIONS = [
-        'zasielkovna'  => ['label' => 'Packeta – výdajné miesto',    'desc' => 'Vyzdvihnutie na výdajnom mieste Packeta.',              'cost' => 3.50, 'type' => 'pickup'],
-        'packeta'      => ['label' => 'Packeta – kuriér na adresu',  'desc' => 'Doručenie kuriérom Packeta v rámci SR.',                'cost' => 4.50, 'type' => 'courier'],
+        'packeta-vydajne' => ['label' => 'Packeta – výdajné miesto',    'desc' => 'Vyzdvihnutie na výdajnom mieste Packeta.',              'cost' => 3.50, 'type' => 'pickup'],
+        'packeta-kurier'  => ['label' => 'Packeta – kuriér na adresu',  'desc' => 'Doručenie kuriérom Packeta v rámci SR.',                'cost' => 4.50, 'type' => 'courier'],
         'gls'          => ['label' => 'GLS – kuriér na adresu',      'desc' => 'Doručenie kuriérom GLS v rámci SR.',                    'cost' => 4.50, 'type' => 'courier'],
         'dpd'          => ['label' => 'DPD – kuriér na adresu',      'desc' => 'Doručenie kuriérom DPD v rámci SR.',                    'cost' => 4.50, 'type' => 'courier'],
         'osobny-odber' => ['label' => 'Osobný odber v Bratislave',   'desc' => 'Foxlog Warehouse, Stará Vajnorská 11 · pracovné dni 8:00 – 15:30. Počkajte na potvrdenie, že je objednávka pripravená.', 'cost' => 0, 'type' => 'personal'],
@@ -44,7 +44,7 @@ class CheckoutController extends Controller
     {
         $options = self::DELIVERY_OPTIONS;
         if (!filled(config('services.packeta.api_key'))) {
-            unset($options['zasielkovna']);
+            unset($options['packeta-vydajne']);
         }
         return $options;
     }
@@ -168,7 +168,7 @@ class CheckoutController extends Controller
         }
 
         $shippingMethod  = $isPickup ? 'pickup' : ($isPersonal ? 'personal' : 'courier');
-        $shippingCarrier = $choice; // zasielkovna | packeta | gls | dpd | osobny-odber
+        $shippingCarrier = $choice; // packeta-vydajne | packeta-kurier | gls | dpd | osobny-odber
 
         if ($isPersonal) {
             $data['shipping_address'] = 'Osobný odber – Foxlog Warehouse, Stará Vajnorská 11';
