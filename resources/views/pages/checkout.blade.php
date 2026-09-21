@@ -167,8 +167,7 @@
                         <small>{{ $opt['desc'] }}{{ $opt['cost'] > 0 ? ' Zadarmo od €' . $freeShippingFrom . '.' : '' }}</small>
                     </label>
                 </div>
-                @endforeach
-                @if (!empty($packetaKey))
+                @if ($opt['type'] === 'pickup')
                 <div id="pickup-point-block" class="ck-pickup" hidden>
                     <button type="button" class="btn btn-line" id="pickup-pick-btn">Vybrať výdajné miesto →</button>
                     <div id="pickup-selected" class="ck-pickup-selected" hidden></div>
@@ -179,6 +178,7 @@
                     <input type="hidden" name="shipping_country" id="pickup_country" value="SK">
                 </div>
                 @endif
+                @endforeach
             </div>
 
             <div class="ck-grp">

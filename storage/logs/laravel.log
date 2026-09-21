@@ -841,3 +841,4 @@
 #62 /Users/martinachberger/Projects/public/previa/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php(23): require_once('/Users/martinac...')
 #63 {main}
 "} 
+[2026-09-21 21:18:12] local.WARNING: Stripe webhook signature verification failed {"error":"Unable to extract timestamp and signatures from header"} 

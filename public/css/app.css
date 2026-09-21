@@ -6243,14 +6243,14 @@ input.is-invalid, select.is-invalid, textarea.is-invalid {
 .ck-pickup {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 16px;
   flex-wrap: wrap;
-  margin: 0 0 10px;
+  margin: -10px 0 10px;
   padding: 14px 16px;
   border: 1px solid var(--line);
-  border-top: none;
-}
-
+  border-top: 1px dashed var(--line);
+} /* sits directly under the Packeta option as one box */
 .ck-pickup .btn {
   padding: 11px 18px;
 }
@@ -6259,8 +6259,7 @@ input.is-invalid, select.is-invalid, textarea.is-invalid {
   font-size: 13px;
   color: var(--ink);
   line-height: 1.4;
-  flex: 1;
-  min-width: 200px;
+  text-align: center;
 }
 
 .ck-pickup-selected::before {
