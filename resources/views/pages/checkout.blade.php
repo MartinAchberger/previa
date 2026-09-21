@@ -169,9 +169,9 @@
                 </div>
                 @endforeach
                 @if (!empty($packetaKey))
-                <div id="pickup-point-block" hidden style="margin:4px 0 8px;padding:14px;border:1px solid var(--line)">
-                    <button type="button" class="btn" id="pickup-pick-btn" style="margin-bottom:10px">Vybrať výdajné miesto →</button>
-                    <div id="pickup-selected" style="font-size:14px;color:var(--ink)" hidden></div>
+                <div id="pickup-point-block" class="ck-pickup" hidden>
+                    <button type="button" class="btn btn-line" id="pickup-pick-btn">Vybrať výdajné miesto →</button>
+                    <div id="pickup-selected" class="ck-pickup-selected" hidden></div>
                     <input type="hidden" name="pickup_point_id" id="pickup_point_id" value="{{ old('pickup_point_id') }}">
                     <input type="hidden" name="pickup_point_name" id="pickup_point_name" value="{{ old('pickup_point_name') }}">
                     <input type="hidden" name="shipping_city" id="pickup_city" value="{{ old('shipping_city') }}">

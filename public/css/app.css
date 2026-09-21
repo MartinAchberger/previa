@@ -3868,14 +3868,13 @@ input.is-invalid, select.is-invalid, textarea.is-invalid {
 
 .ck-li {
   display: grid;
-  grid-template-columns: 50px 1fr auto;
-  gap: 12px;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
   padding: 10px 0;
   border-bottom: 1px solid var(--hair);
-  align-items: center;
+  align-items: start;
   font-size: 13px;
-}
-
+} /* 2 children: info + price (was 3 columns → name squeezed into 50px) */
 .ck-li:last-child {
   border-bottom: none;
 }
@@ -3896,10 +3895,12 @@ input.is-invalid, select.is-invalid, textarea.is-invalid {
   font-size: 11px;
   color: var(--mute);
   margin-top: 2px;
+  white-space: nowrap;
 }
 
 .ck-li-pr {
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .ck-totals {
@@ -6236,4 +6237,42 @@ input.is-invalid, select.is-invalid, textarea.is-invalid {
   max-width: 820px;
   white-space: normal;
   margin: 0 auto;
+}
+
+/* checkout: Packeta pickup-point picker as a compact row; form controls in brand colour, not browser blue */
+.ck-pickup {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 0 0 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-top: none;
+}
+
+.ck-pickup .btn {
+  padding: 11px 18px;
+}
+
+.ck-pickup-selected {
+  font-size: 13px;
+  color: var(--ink);
+  line-height: 1.4;
+  flex: 1;
+  min-width: 200px;
+}
+
+.ck-pickup-selected::before {
+  content: "✓ ";
+  color: var(--mute);
+}
+
+input[type=radio], input[type=checkbox] {
+  accent-color: var(--ink);
+}
+
+.ck-method input[type=radio] {
+  width: 16px;
+  height: 16px;
 }
