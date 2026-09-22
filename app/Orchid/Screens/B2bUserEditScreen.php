@@ -4,6 +4,7 @@ namespace App\Orchid\Screens;
 
 use App\Mail\B2bApprovedMail;
 use App\Models\B2bUser;
+use App\Orchid\Layouts\OrderListLayout;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -27,7 +28,11 @@ class B2bUserEditScreen extends Screen
     {
         $this->user = $b2b_user;
         $this->exists = $b2b_user->exists;
-        return ['user' => $b2b_user];
+        return [
+            'user'   => $b2b_user,
+            // Salon's order history (newest first) shown under the form.
+            'orders' => $b2b_user->exists ? $b2b_user->orders()->latest('id')->get() : collect(),
+        ];
     }
 
     public function name(): string
