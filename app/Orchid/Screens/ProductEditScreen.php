@@ -80,7 +80,7 @@ class ProductEditScreen extends Screen
                 Input::make('product.complex')->title('Aktívny komplex')->maxlength(80),
                 Input::make('product.volume')->title('Objem')->help('napr. "250 ml"'),
                 Input::make('product.sku')->title('SKU (sklad Foxlog)')->maxlength(64)->help('Skladové SKU pre fulfillment. Musí sedieť so SKU vo Foxlogu.'),
-                Input::make('product.stock')->type('number')->title('Sklad (ks)')->help('Stav zásob zo skladu. Synchronizuje sa automaticky; nechaj prázdne ak sklad neriešiš.'),
+                Input::make('product.stock')->type('number')->title('Sklad (ks)')->help('Stav zásob v kusoch. Nechaj prázdne, ak sklad neriešiš – produkt sa predáva bez obmedzenia. 0 = zobrazí sa ako vypredaný.'),
                 Select::make('variant_members')
                     ->title('Veľkosti toho istého produktu (voliteľné)')
                     ->options($productOptions)
