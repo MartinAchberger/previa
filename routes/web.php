@@ -5,7 +5,6 @@ use App\Http\Controllers\B2b\BulkOrderController as B2bBulkOrderController;
 use App\Http\Controllers\B2b\DashboardController as B2bDashboardController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\FoxlogWebhookController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\BlogController;
@@ -40,10 +39,6 @@ Route::post('/objednat', [CheckoutController::class, 'store'])
 Route::get('/objednavka/{orderNumber}', [CheckoutController::class, 'confirmation'])
     ->middleware('signed')
     ->name('order.confirmation');
-
-// Foxlog fulfilment webhooks (warehouse → us). Auth via X-Foxlog-Token header.
-Route::post('/api/foxlog/stock', [FoxlogWebhookController::class, 'stock'])->name('foxlog.stock');
-Route::post('/api/foxlog/order-status', [FoxlogWebhookController::class, 'orderStatus'])->name('foxlog.order-status');
 
 // Stripe payment return URLs
 Route::get('/platba/{orderNumber}/success', [StripeController::class, 'success'])->name('stripe.success');

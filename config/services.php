@@ -52,10 +52,7 @@ return [
     'foxlog' => [
         'base_url'       => env('FOXLOG_BASE_URL', 'https://app.foxlog.sk/api/v1'),
         'api_token'      => env('FOXLOG_API_TOKEN'),           // outbound auth (our token)
-        'webhook_secret' => env('FOXLOG_WEBHOOK_SECRET'),      // inbound auth (Foxlog → us)
         'enabled'        => (bool) env('FOXLOG_ENABLED', false),
-        // Owner gets an e-mail when a product's stock drops to this level or below.
-        'low_stock_threshold' => (int) env('FOXLOG_LOW_STOCK_THRESHOLD', 3),
     ],
 
     'cookiebot' => [
