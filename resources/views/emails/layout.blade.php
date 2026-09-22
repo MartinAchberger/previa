@@ -12,7 +12,7 @@
                 <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;border:1px solid #e6e2da;">
                     <tr>
                         <td style="padding:28px 36px;border-bottom:1px solid #e6e2da;">
-                            <span style="font-family:Georgia,'Times New Roman',serif;font-size:20px;letter-spacing:0.04em;color:#12110f;">PH&nbsp;LABORATORIES</span>
+                            <span style="font-family:Georgia,'Times New Roman',serif;font-size:20px;letter-spacing:0.32em;color:#12110f;">PREVIA</span>
                         </td>
                     </tr>
                     <tr>

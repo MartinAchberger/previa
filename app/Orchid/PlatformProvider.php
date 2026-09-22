@@ -39,12 +39,7 @@ class PlatformProvider extends OrchidServiceProvider
 
             Menu::make('Línie')
                 ->icon('bs.collection')
-                ->route('platform.lines'),
-
-            Menu::make('Blog')
-                ->icon('bs.newspaper')
-                ->route('platform.blog')
-                ->title('Obsah')
+                ->route('platform.lines')
                 ->divider(),
 
             Menu::make(__('Users'))
@@ -78,7 +73,7 @@ class PlatformProvider extends OrchidServiceProvider
         return [
             ItemPermission::group('Eshop')
                 ->addPermission('platform.eshop.orders', 'Objednávky a faktúry')
-                ->addPermission('platform.eshop.catalog', 'Produkty, línie, blog')
+                ->addPermission('platform.eshop.catalog', 'Produkty a línie')
                 ->addPermission('platform.eshop.b2b', 'B2B salóny'),
             ItemPermission::group(__('System'))
                 ->addPermission('platform.systems.roles', __('Roles'))

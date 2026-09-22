@@ -10,6 +10,13 @@
     <meta property="og:title" content="@yield('title', 'PREVIA')">
     <meta property="og:description" content="@yield('description', 'Talianska profesionálna vlasová kozmetika PREVIA. Distribúcia pre Slovensko.')">
     <meta property="og:type" content="website">
+    <meta property="og:site_name" content="PREVIA">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="{{ asset('og-image.png') }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="{{ asset('og-image.png') }}">
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
 

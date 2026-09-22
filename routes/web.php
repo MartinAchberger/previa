@@ -5,9 +5,9 @@ use App\Http\Controllers\B2b\BulkOrderController as B2bBulkOrderController;
 use App\Http\Controllers\B2b\DashboardController as B2bDashboardController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\FoxlogWebhookController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\StripeController;
-use App\Http\Controllers\BlogController;
 use App\Http\Controllers\HairQuizController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShopController;
@@ -27,8 +27,6 @@ Route::get('/diagnostika', [HairQuizController::class, 'show'])->name('quiz.show
 Route::post('/diagnostika', [HairQuizController::class, 'result'])
     ->middleware('throttle:20,1')
     ->name('quiz.result');
-Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
-Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 // Cart + checkout
 Route::get('/kosik', [CartController::class, 'show'])->name('cart.show');
@@ -39,6 +37,10 @@ Route::post('/objednat', [CheckoutController::class, 'store'])
 Route::get('/objednavka/{orderNumber}', [CheckoutController::class, 'confirmation'])
     ->middleware('signed')
     ->name('order.confirmation');
+
+// Foxlog fulfilment webhooks (warehouse → us). Auth via X-Foxlog-Token header.
+Route::post('/api/foxlog/stock', [FoxlogWebhookController::class, 'stock'])->name('foxlog.stock');
+Route::post('/api/foxlog/order-status', [FoxlogWebhookController::class, 'orderStatus'])->name('foxlog.order-status');
 
 // Stripe payment return URLs
 Route::get('/platba/{orderNumber}/success', [StripeController::class, 'success'])->name('stripe.success');
@@ -58,7 +60,7 @@ Route::prefix('b2b')->name('b2b.')->group(function () {
             ->name('register.submit');
     });
 
-    Route::post('/logout', [B2bAuthController::class, 'logout'])->name('logout');
+    Route::match(['get', 'post'], '/logout', [B2bAuthController::class, 'logout'])->name('logout');
 
     Route::middleware('auth:b2b')->group(function () {
         Route::get('/dashboard', [B2bDashboardController::class, 'index'])->name('dashboard');

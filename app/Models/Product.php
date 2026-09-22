@@ -25,7 +25,7 @@ class Product extends Model
         'line_id', 'extra_line_ids', 'code', 'sku', 'stock', 'variant_group', 'slug', 'name', 'subtitle', 'line_label',
         'complex', 'volume', 'price', 'discount_percent', 'badge', 'kind', 'tone', 'cap',
         'image_path', 'description', 'for_whom', 'expect', 'usage', 'pro_sections',
-        'fragrance', 'shades', 'sort_order', 'published', 'featured', 'b2b_only',
+        'fragrance', 'shades', 'sort_order', 'published', 'featured', 'b2b_only', 'is_gift_bag',
     ];
 
     /** Collections that make up the professional (salon-only) range. */
@@ -41,6 +41,7 @@ class Product extends Model
         'published' => 'boolean',
         'featured' => 'boolean',
         'b2b_only' => 'boolean',
+        'is_gift_bag' => 'boolean',
         'sort_order' => 'integer',
         'extra_line_ids' => 'array',
         'for_whom' => 'array',

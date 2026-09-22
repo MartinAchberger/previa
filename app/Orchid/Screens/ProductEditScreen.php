@@ -80,7 +80,7 @@ class ProductEditScreen extends Screen
                 Input::make('product.complex')->title('Aktívny komplex')->maxlength(80),
                 Input::make('product.volume')->title('Objem')->help('napr. "250 ml"'),
                 Input::make('product.sku')->title('SKU (sklad Foxlog)')->maxlength(64)->help('Skladové SKU pre fulfillment. Musí sedieť so SKU vo Foxlogu.'),
-                Input::make('product.stock')->type('number')->title('Sklad (ks)')->help('Stav zásob v kusoch. Nechaj prázdne, ak sklad neriešiš – produkt sa predáva bez obmedzenia. 0 = zobrazí sa ako vypredaný.'),
+                Input::make('product.stock')->type('number')->title('Sklad (ks)')->help('Stav zásob v kusoch. Aktualizuje sa automaticky zo skladu Foxlog. Nechaj prázdne, ak sklad neriešiš – produkt sa predáva bez obmedzenia. 0 = vypredané.'),
                 Select::make('variant_members')
                     ->title('Veľkosti toho istého produktu (voliteľné)')
                     ->options($productOptions)
@@ -131,6 +131,7 @@ class ProductEditScreen extends Screen
                 CheckBox::make('product.published')->title('Publikované')->placeholder('Zobraziť na webe')->sendTrueOrFalse()->value($this->product->published ?? true),
                 CheckBox::make('product.featured')->title('Výber na úvodnej stránke')->placeholder('Zobraziť v sekcii „Začnite svoju cestu ku krajším vlasom“ (zobrazujú sa max. 4 podľa poradia)')->sendTrueOrFalse()->value($this->product->featured ?? false),
                 CheckBox::make('product.b2b_only')->title('Iba pre salóny')->placeholder('Zobraziť iba prihláseným salónom (skryť pred verejnosťou)')->sendTrueOrFalse()->value($this->product->b2b_only ?? false),
+                CheckBox::make('product.is_gift_bag')->title('Darčekové balenie')->placeholder('Ponúkať v pokladni ako darčekovú tašku (potrebuje cenu a SKU pre sklad)')->sendTrueOrFalse()->value($this->product->is_gift_bag ?? false),
             ]),
         ];
     }
@@ -185,6 +186,11 @@ class ProductEditScreen extends Screen
             $data['code'] = (string) ($maxCode + 1);
         } else {
             unset($data['code']);
+        }
+
+        // SKU must never be empty — Foxlog stock sync matches on it. Default to the code.
+        if (trim((string) ($data['sku'] ?? '')) === '') {
+            $data['sku'] = $data['code'] ?? $product->code;
         }
 
         if (isset($data['shades']) && is_array($data['shades'])) {

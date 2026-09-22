@@ -43,7 +43,7 @@
 
 <section class="j-list">
     <h3>Naše princípy <small>Na čom staviame</small></h3>
-    <div class="howto-grid" style="grid-template-columns: repeat(4, 1fr)">
+    <div class="howto-grid">
         <div class="howto-step">
             <div class="n">- 01</div>
             <div class="ti">Rovnováha</div>

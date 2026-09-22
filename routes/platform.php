@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 use App\Orchid\Screens\B2bUserEditScreen;
 use App\Orchid\Screens\B2bUserListScreen;
-use App\Orchid\Screens\BlogEditScreen;
-use App\Orchid\Screens\BlogListScreen;
 use App\Models\Order;
 use App\Orchid\Screens\OrderListScreen;
 use App\Orchid\Screens\OrderViewScreen;
@@ -144,15 +142,3 @@ Route::screen('lines/{line}/edit', ProductLineEditScreen::class)
     ->name('platform.lines.edit')
     ->breadcrumbs(fn (Trail $trail, $line) => $trail->parent('platform.lines')->push($line->name));
 
-// Blog
-Route::screen('blog', BlogListScreen::class)
-    ->name('platform.blog')
-    ->breadcrumbs(fn (Trail $trail) => $trail->parent('platform.index')->push('Blog'));
-
-Route::screen('blog/create', BlogEditScreen::class)
-    ->name('platform.blog.create')
-    ->breadcrumbs(fn (Trail $trail) => $trail->parent('platform.blog')->push('Nový článok'));
-
-Route::screen('blog/{article}/edit', BlogEditScreen::class)
-    ->name('platform.blog.edit')
-    ->breadcrumbs(fn (Trail $trail, $article) => $trail->parent('platform.blog')->push($article->title));

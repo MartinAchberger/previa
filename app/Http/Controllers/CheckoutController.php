@@ -63,6 +63,19 @@ class CheckoutController extends Controller
         return (float) (self::deliveryOptions()[$choice]['cost'] ?? self::minShippingCost());
     }
 
+    /**
+     * Gift bags offered in the checkout "Darčekové balenie" dropdown. Flagged in
+     * admin (is_gift_bag); usually b2b_only so they never show in the B2C shop.
+     */
+    private function giftBags()
+    {
+        return Product::withoutGlobalScopes()
+            ->where('is_gift_bag', true)
+            ->where('published', true)
+            ->orderBy('price')
+            ->get();
+    }
+
     public function show(): View
     {
         $b2b = Auth::guard('b2b')->user();
@@ -70,6 +83,7 @@ class CheckoutController extends Controller
             'deliveryOptions'  => self::deliveryOptions(),
             'minShippingCost'  => self::minShippingCost(),
             'freeShippingFrom' => self::FREE_SHIPPING_FROM,
+            'giftBags'        => $this->giftBags(),
             'b2b' => $b2b,
             // Pay-by-invoice is offered only to approved salons that have no
             // outstanding (unpaid) invoice order.
@@ -119,6 +133,7 @@ class CheckoutController extends Controller
             'payment_method'   => 'required|in:cod,card,transfer',
             'delivery_choice'  => 'required|in:' . implode(',', array_keys($deliveryOptions)),
             'notes'            => 'nullable|string|max:1000',
+            'gift_bag'         => 'nullable|string|in:' . implode(',', $this->giftBags()->pluck('code')->all()),
             'terms'            => 'accepted',
             'items'            => 'required|array|min:1',
             'items.*.id'       => 'required|string|max:80',
@@ -254,6 +269,18 @@ class CheckoutController extends Controller
         // different order than the customer saw — ask them to refresh the cart.
         if (!empty($dropped)) {
             return back()->withErrors(['items' => 'Tieto položky už nie sú dostupné: ' . implode(', ', $dropped) . '. Odstráňte ich prosím z košíka a skúste znova.'])->withInput();
+        }
+
+        // Gift bag chosen in the checkout dropdown; priced server-side like any line.
+        if (!empty($data['gift_bag'])) {
+            $bag = $this->giftBags()->firstWhere('code', $data['gift_bag']);
+            if ($bag && !$bag->isOutOfStock()) {
+                $basePrice = $bag->discountedPrice((float) $bag->price);
+                $unit = round($basePrice * (1 - $discountPct / 100), 2);
+                $subtotal += $unit;
+                $subtotalBeforeDiscount += $basePrice;
+                $lines[] = ['product' => $bag, 'shade' => null, 'qty' => 1, 'unit_price' => $unit, 'line_total' => $unit];
+            }
         }
 
         $subtotalBeforeDiscount = round($subtotalBeforeDiscount, 2);

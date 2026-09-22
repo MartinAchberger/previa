@@ -25,7 +25,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->validateCsrfTokens(except: [
+            'b2b/logout',
             'stripe/webhook',
+            'api/foxlog/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

@@ -106,11 +106,11 @@
                         <label>Mesto</label>
                         <input type="text" name="billing_city" value="{{ old('billing_city', $b2b->city ?? '') }}">
                     </div>
-                    <div class="ck-fi" style="max-width:160px">
+                    <div class="ck-fi ck-fi--zip">
                         <label>PSČ</label>
                         <input type="text" name="billing_zip" value="{{ old('billing_zip', $b2b->zip ?? '') }}">
                     </div>
-                    <div class="ck-fi" style="max-width:140px">
+                    <div class="ck-fi ck-fi--country">
                         <label>Krajina</label>
                         <select name="billing_country">
                             <option value="SK" @selected(old('billing_country', $b2b->country ?? 'SK') === 'SK')>Slovensko</option>
@@ -141,11 +141,11 @@
                             <label>Mesto</label>
                             <input type="text" name="shipping_city" value="{{ old('shipping_city') }}">
                         </div>
-                        <div class="ck-fi" style="max-width:160px">
+                        <div class="ck-fi ck-fi--zip">
                             <label>PSČ</label>
                             <input type="text" name="shipping_zip" value="{{ old('shipping_zip') }}">
                         </div>
-                        <div class="ck-fi" style="max-width:140px">
+                        <div class="ck-fi ck-fi--country">
                             <label>Krajina</label>
                             <select name="shipping_country">
                                 <option value="SK" @selected(old('shipping_country', 'SK') === 'SK')>Slovensko</option>
@@ -208,6 +208,24 @@
                 </div>
                 @endif
             </div>
+
+            @if ($giftBags->isNotEmpty())
+            <div class="ck-grp">
+                <h3>Darčekové balenie (voliteľné)</h3>
+                <div class="ck-row">
+                    <div class="ck-fi">
+                        <label for="gift-bag-select">Zabaliť ako darček</label>
+                        <select name="gift_bag" id="gift-bag-select">
+                            <option value="" data-price="0">Bez darčekového balenia</option>
+                            @foreach ($giftBags as $bag)
+                                <option value="{{ $bag->code }}" data-price="{{ $bag->salePrice() }}" @selected(old('gift_bag') === $bag->code)>{{ $bag->name }}{{ $bag->volume ? ' · ' . $bag->volume : '' }} (+€{{ number_format($bag->salePrice(), 2, ',', ' ') }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                @error('gift_bag')<p class="ck-note" style="color:#b3261e">{{ $message }}</p>@enderror
+            </div>
+            @endif
 
             <div class="ck-grp">
                 <h3>Poznámka k objednávke (voliteľné)</h3>
@@ -281,7 +299,7 @@
             </div>
         `).join('');
 
-        const sub = c.subtotal();
+        const sub = c.subtotal() + giftBagPrice();
         const vat = sub - sub / 1.23;
         const chosen = document.querySelector('input[name="delivery_choice"]:checked');
         const shipCost = chosen ? parseFloat(chosen.dataset.shipCost || '0') : MIN_SHIP;
@@ -291,7 +309,7 @@
         document.querySelector('[data-ck-vat]').textContent = fmt(vat);
         const disc = document.querySelector('[data-ck-disc]');
         if (disc) {
-            const original = c.items.reduce((s, i) => s + (i.price / (1 - DISCOUNT_PCT / 100)) * i.qty, 0);
+            const original = c.items.reduce((s, i) => s + (i.price / (1 - DISCOUNT_PCT / 100)) * i.qty, 0) + giftBagBase();
             disc.textContent = '−' + fmt(original - sub);
         }
         document.querySelector('[data-ck-ship]').textContent = ship === 0 ? 'zadarmo' : fmt(ship);
@@ -302,6 +320,31 @@
 
     document.addEventListener('cart:change', render);
     document.addEventListener('DOMContentLoaded', render);
+
+    // --- Darčekové balenie: dropdown, výber si pamätáme v localStorage ---
+    const bagSelect = document.getElementById('gift-bag-select');
+    const GIFT_KEY = 'ph_gift_bag';
+
+    function giftBagBase() {
+        if (!bagSelect || !bagSelect.value) return 0;
+        const opt = bagSelect.options[bagSelect.selectedIndex];
+        return parseFloat((opt && opt.dataset.price) || '0');
+    }
+
+    function giftBagPrice() {
+        return giftBagBase() * (1 - DISCOUNT_PCT / 100);
+    }
+
+    if (bagSelect) {
+        try {
+            const saved = localStorage.getItem(GIFT_KEY);
+            if (!bagSelect.value && saved && [...bagSelect.options].some(o => o.value === saved)) bagSelect.value = saved;
+        } catch (e) {}
+        bagSelect.addEventListener('change', () => {
+            try { localStorage.setItem(GIFT_KEY, bagSelect.value); } catch (e) {}
+            render();
+        });
+    }
 
     function updateSubmitLabel() {
         const method = document.querySelector('input[name="payment_method"]:checked')?.value;
