@@ -176,13 +176,15 @@ class Order extends Model
             || $this->billing_country !== $this->shipping_country;
     }
 
-    public static function generateOrderNumber(string $prefix = 'PH'): string
+    public static function generateOrderNumber(string $prefix = 'PR'): string
     {
         $year = now()->format('y');
         // Lock the highest existing row for this year so two concurrent checkouts
         // can't read the same max and generate a duplicate number (which would hit
         // the unique index and 500). Must run inside the checkout transaction.
-        $last = self::where('order_number', 'like', "{$prefix}-{$year}-%")
+        // Match any prefix for the year so the sequence continues across the
+        // PH- → PR- rename (old Previa orders are PH-26-000x).
+        $last = self::where('order_number', 'like', "%-{$year}-%")
             ->orderByDesc('id')
             ->lockForUpdate()
             ->first();

@@ -263,7 +263,7 @@ class CheckoutController extends Controller
 
         $order = DB::transaction(function () use ($data, $lines, $subtotalBeforeDiscount, $discountValue, $shipping, $total, $discountPct, $b2b, $isCompany, $shippingMethod, $shippingCarrier) {
             $order = Order::create([
-                'order_number'     => Order::generateOrderNumber('PH'),
+                'order_number'     => Order::generateOrderNumber('PR'),
                 'b2b_user_id'      => $b2b?->id,
                 'order_type'       => $b2b ? 'b2b' : 'b2c',
                 'customer_name'    => $data['customer_name'],
