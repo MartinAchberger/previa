@@ -54,7 +54,7 @@ class B2bUserEditScreen extends Screen
 
     public function layout(): array
     {
-        return [
+        $layouts = [
             Layout::rows([
                 Input::make('user.salon_name')->title('Názov salónu')->required()->maxlength(200),
                 Input::make('user.contact_name')->title('Kontaktná osoba')->required(),
@@ -72,6 +72,14 @@ class B2bUserEditScreen extends Screen
                 Input::make('new_password')->type('password')->title('Nastaviť nové heslo (voliteľné)')->help('Vyplň iba ak chceš resetovať heslo'),
             ]),
         ];
+
+        if ($this->exists) {
+            $layouts[] = Layout::block(OrderListLayout::class)
+                ->title('Objednávky salónu')
+                ->description('Všetky objednávky tohto salónu, najnovšie hore. Kliknutím na číslo otvoríš detail.');
+        }
+
+        return $layouts;
     }
 
     public function save(B2bUser $b2b_user, Request $request)

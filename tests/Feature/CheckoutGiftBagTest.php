@@ -30,6 +30,8 @@ class CheckoutGiftBagTest extends TestCase
 
     public function test_checkout_shows_gift_bag_dropdown_only_when_a_bag_is_flagged(): void
     {
+        DB::table('products')->update(['is_gift_bag' => false]); // rolled back with the transaction
+
         $this->get('/pokladna')->assertOk()->assertDontSee('Darčekové balenie (voliteľné)');
 
         $this->product(['name' => 'Darčeková taška TEST', 'code' => 'GBTEST', 'price' => 3, 'is_gift_bag' => true, 'b2b_only' => true]);
