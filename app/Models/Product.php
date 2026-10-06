@@ -96,6 +96,19 @@ class Product extends Model
         return null;
     }
 
+    /** Warehouse SKU of a shade — every shade is its own Foxlog stock item. */
+    public function shadeSku(array $shade): string
+    {
+        $sku = trim((string) ($shade['sku'] ?? ''));
+        return $sku !== '' ? $sku : ($this->sku ?: $this->code) . '-' . ($shade['code'] ?? '');
+    }
+
+    /** Same rule as isOutOfStock(): no stock key means the shade is not tracked. */
+    public static function isShadeOutOfStock(?array $shade): bool
+    {
+        return $shade !== null && isset($shade['stock']) && (int) $shade['stock'] <= 0;
+    }
+
     public function shadesGrouped(): array
     {
         if (!$this->hasShades()) return [];

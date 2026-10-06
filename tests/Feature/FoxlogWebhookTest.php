@@ -73,6 +73,25 @@ class FoxlogWebhookTest extends TestCase
         $this->assertSame(7, (int) DB::table('products')->where('id', $id)->value('stock'));
     }
 
+    public function test_stock_updates_shades_by_shade_sku(): void
+    {
+        $id = $this->makeProduct('TST-SH');
+        DB::table('products')->where('id', $id)->update(['shades' => json_encode([
+            ['code' => '9.42', 'name' => 'Blond'],
+            ['code' => '7.0', 'name' => 'Natur', 'sku' => 'CUSTOM-70'],
+        ])]);
+
+        $res = $this->postJson('/api/foxlog/stock', ['TST-SH-9.42' => 0, 'CUSTOM-70' => 5, 'TST-SH-1.1' => 2], $this->headers());
+
+        $res->assertOk()->assertJson(['updated' => 2, 'unknown_skus' => ['TST-SH-1.1']]);
+        $shades = json_decode(DB::table('products')->where('id', $id)->value('shades'), true);
+        $this->assertSame(0, $shades[0]['stock']);
+        $this->assertSame(5, $shades[1]['stock']);
+        $this->assertNull(DB::table('products')->where('id', $id)->value('stock'));
+        $this->assertTrue(Product::isShadeOutOfStock($shades[0]));
+        $this->assertFalse(Product::isShadeOutOfStock($shades[1]));
+    }
+
     public function test_order_status_maps_status_stores_tracking_and_emails_customer_once(): void
     {
         $id = $this->makeOrder('TS-26-9001');

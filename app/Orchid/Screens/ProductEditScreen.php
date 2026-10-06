@@ -194,9 +194,13 @@ class ProductEditScreen extends Screen
         }
 
         if (isset($data['shades']) && is_array($data['shades'])) {
+            // Stock is not editable in the matrix — keep what the Foxlog sync stored, by shade code.
+            $oldStock = collect((array) $product->shades)
+                ->filter(fn ($s) => is_array($s) && isset($s['code'], $s['stock']))
+                ->mapWithKeys(fn ($s) => [trim((string) $s['code']) => (int) $s['stock']]);
             $data['shades'] = collect($data['shades'])
                 ->filter(fn ($row) => is_array($row) && !empty($row['code']))
-                ->map(fn ($row) => [
+                ->map(fn ($row) => array_filter([
                     'code'  => trim((string) ($row['code'] ?? '')),
                     'name'  => trim((string) ($row['name'] ?? '')),
                     'group' => trim((string) ($row['group'] ?? '')),
@@ -204,7 +208,9 @@ class ProductEditScreen extends Screen
                     'price' => $row['price'] !== null && $row['price'] !== ''
                         ? (float) str_replace(',', '.', (string) $row['price'])
                         : null,
-                ])
+                    'sku'   => trim((string) ($row['sku'] ?? '')) ?: null,
+                    'stock' => $oldStock->get(trim((string) $row['code'])),
+                ], fn ($v, $k) => !in_array($k, ['sku', 'stock'], true) || $v !== null, ARRAY_FILTER_USE_BOTH))
                 ->values()
                 ->all();
             if (empty($data['shades'])) {

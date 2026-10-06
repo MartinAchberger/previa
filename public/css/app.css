@@ -6386,3 +6386,8 @@ input[type=radio], input[type=checkbox] {
     padding: 22px 18px;
   }
 }
+
+/* Shade sold out (Foxlog stock 0) */
+.pdp-shade.is-oos { opacity: .45; cursor: not-allowed; }
+.pdp-shade.is-oos .pdp-shade-swatch { filter: grayscale(.6); }
+.pdp-shade.is-oos .pdp-shade-pr { font-size: .75em; text-transform: uppercase; letter-spacing: .06em; }

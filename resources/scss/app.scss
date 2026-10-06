@@ -1346,3 +1346,8 @@ input[type=radio], input[type=checkbox] { accent-color: var(--ink); }
 }
 @media (max-width: 900px) { .howto-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 640px) { .howto { padding: 56px 16px; } .howto-grid { grid-template-columns: 1fr; } .howto-step { padding: 22px 18px; } }
+
+/* Shade sold out (Foxlog stock 0) */
+.pdp-shade.is-oos { opacity: .45; cursor: not-allowed; }
+.pdp-shade.is-oos .pdp-shade-swatch { filter: grayscale(.6); }
+.pdp-shade.is-oos .pdp-shade-pr { font-size: .75em; text-transform: uppercase; letter-spacing: .06em; }

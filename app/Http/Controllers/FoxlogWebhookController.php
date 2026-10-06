@@ -49,14 +49,35 @@ class FoxlogWebhookController extends Controller
         $updated = 0;
         $unknown = [];
         $lowNow = [];
+        $shadeIndex = null;
+        $touchedShadeProducts = [];
         foreach ($payload as $sku => $level) {
             if (!is_scalar($sku) || !is_numeric($level)) {
                 continue;
             }
+            $sku = (string) $sku;
             $level = (int) $level;
-            $products = Product::withoutGlobalScopes()->where('sku', (string) $sku)->get(['id', 'name', 'volume', 'stock', 'published']);
+            $products = Product::withoutGlobalScopes()->where('sku', $sku)->get(['id', 'name', 'volume', 'stock', 'published']);
             if ($products->isEmpty()) {
-                $unknown[] = (string) $sku;
+                // Not a product SKU — maybe a shade ("<product sku>-<shade code>",
+                // as in the CSV export). Shade stock lives inside the shades JSON.
+                $shadeIndex ??= $this->shadeIndex();
+                if (!isset($shadeIndex[$sku])) {
+                    $unknown[] = $sku;
+                    continue;
+                }
+                $updated++;
+                foreach ($shadeIndex[$sku] as [$product, $i]) {
+                    $shades = $product->shades;
+                    $old = $shades[$i]['stock'] ?? null;
+                    $wasLow = $old !== null && (int) $old <= $threshold;
+                    if ($product->published && $level <= $threshold && !$wasLow) {
+                        $lowNow[] = trim($product->name . ' · ' . ($shades[$i]['code'] ?? '') . ' ' . ($shades[$i]['name'] ?? '')) . ' (SKU ' . $sku . '): ' . ($level <= 0 ? 'vypredané' : $level . ' ks');
+                    }
+                    $shades[$i]['stock'] = $level;
+                    $product->shades = $shades;
+                    $touchedShadeProducts[$product->id] = $product;
+                }
                 continue;
             }
             $updated++;
@@ -67,7 +88,11 @@ class FoxlogWebhookController extends Controller
                     $lowNow[] = trim($product->name . ' ' . ($product->volume ?: '')) . ' (SKU ' . $sku . '): ' . ($level <= 0 ? 'vypredané' : $level . ' ks');
                 }
             }
-            Product::withoutGlobalScopes()->where('sku', (string) $sku)->update(['stock' => $level]);
+            Product::withoutGlobalScopes()->where('sku', $sku)->update(['stock' => $level]);
+        }
+
+        foreach ($touchedShadeProducts as $product) {
+            $product->save();
         }
 
         if (!empty($lowNow)) {
@@ -156,6 +181,25 @@ class FoxlogWebhookController extends Controller
         }
 
         return response()->json(['updated' => $updated, 'unknown_references' => $unknown]);
+    }
+
+    /**
+     * Shade SKU → [[product, shade index], ...] across all products with shades.
+     * Products are shared instances, so several shades of one product in one
+     * payload accumulate on the same model and are saved once.
+     */
+    private function shadeIndex(): array
+    {
+        $index = [];
+        $products = Product::withoutGlobalScopes()->whereNotNull('shades')->get(['id', 'code', 'sku', 'name', 'published', 'shades']);
+        foreach ($products as $product) {
+            foreach ((array) $product->shades as $i => $shade) {
+                if (is_array($shade) && trim((string) ($shade['code'] ?? '')) !== '') {
+                    $index[$product->shadeSku($shade)][] = [$product, $i];
+                }
+            }
+        }
+        return $index;
     }
 
     /**

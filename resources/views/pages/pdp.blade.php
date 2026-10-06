@@ -151,6 +151,7 @@
                                         $sCode = $shade['code'] ?? '';
                                         $sName = $shade['name'] ?? '';
                                         $sColor = $shade['color'] ?? null;
+                                        $sOos = \App\Models\Product::isShadeOutOfStock($shade);
                                         $sPriceRaw = isset($shade['price']) && $shade['price'] !== null && $shade['price'] !== ''
                                             ? (float) $shade['price']
                                             : (float) $product->price;
@@ -169,7 +170,7 @@
                                             'swatch' => $sColor,
                                         ];
                                     @endphp
-                                    <div class="pdp-shade" data-shade
+                                    <div class="pdp-shade @if($sOos) is-oos @endif" data-shade @if($sOos) data-oos @endif
                                          data-code="{{ $sCode }}"
                                          data-name="{{ $sName }}"
                                          data-product="{{ json_encode($shadePayload, JSON_UNESCAPED_UNICODE) }}">
@@ -180,11 +181,11 @@
                                             <div class="pdp-shade-code">{{ $sCode }}</div>
                                             <div class="pdp-shade-name">{{ $sName }}</div>
                                         </div>
-                                        <div class="pdp-shade-pr">€{{ number_format($sPrice, 2, ',', ' ') }}</div>
+                                        <div class="pdp-shade-pr">@if($sOos) Vypredané @else €{{ number_format($sPrice, 2, ',', ' ') }} @endif</div>
                                         <div class="pdp-shade-qty">
-                                            <button type="button" data-q-dec aria-label="Znížiť">−</button>
-                                            <input type="number" min="0" max="99" value="0" data-q aria-label="Množstvo">
-                                            <button type="button" data-q-inc aria-label="Zvýšiť">+</button>
+                                            <button type="button" data-q-dec aria-label="Znížiť" @disabled($sOos)>−</button>
+                                            <input type="number" min="0" max="99" value="0" data-q aria-label="Množstvo" @disabled($sOos)>
+                                            <button type="button" data-q-inc aria-label="Zvýšiť" @disabled($sOos)>+</button>
                                         </div>
                                     </div>
                                 @endforeach
@@ -255,6 +256,7 @@
                     const inc = e.target.closest('[data-q-inc]');
                     if (dec || inc) {
                         const card = (dec || inc).closest('[data-shade]');
+                        if (card.hasAttribute('data-oos')) return;
                         const input = card.querySelector('[data-q]');
                         let v = parseInt(input.value, 10) || 0;
                         v = dec ? Math.max(0, v - 1) : Math.min(99, v + 1);
@@ -265,6 +267,7 @@
                     const sw = e.target.closest('.pdp-shade-swatch');
                     if (sw && body.getAttribute('data-shade-view-mode') === 'grid') {
                         const card = sw.closest('[data-shade]');
+                        if (card.hasAttribute('data-oos')) return;
                         const input = card.querySelector('[data-q]');
                         let v = parseInt(input.value, 10) || 0;
                         v = Math.min(99, v + 1);

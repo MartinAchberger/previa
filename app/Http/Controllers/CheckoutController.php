@@ -238,7 +238,7 @@ class CheckoutController extends Controller
             $shade = null;
             if ($item['shade_code']) {
                 $shade = $product->findShade($item['shade_code']);
-                if (!$shade) { $dropped[] = $product->name . ' · ' . $item['shade_code']; continue; }
+                if (!$shade || Product::isShadeOutOfStock($shade)) { $dropped[] = $product->name . ' · ' . $item['shade_code']; continue; }
             }
 
             // Product sale discount applies to everyone (shade price or base price),

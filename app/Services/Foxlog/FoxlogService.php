@@ -131,7 +131,7 @@ class FoxlogService
             // derived as "<product sku>-<shade code>".
             if ($product && $item->product_code !== $product->code) {
                 $shade = $product->findShade($item->product_code);
-                $sku = $shade['sku'] ?? (($product->sku ?: $product->code) . '-' . $item->product_code);
+                $sku = $product->shadeSku($shade ?? ['code' => $item->product_code]);
             }
             $items[] = array_filter([
                 'sku'      => $sku,
