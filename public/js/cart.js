@@ -92,6 +92,10 @@
             const totEl = drawer.querySelector('.cd-tot');
             if (!list) return;
 
+            // No way to the checkout with an empty cart.
+            const checkoutBtn = drawer.querySelector('.cd-checkout');
+            if (checkoutBtn) checkoutBtn.style.display = this.items.length === 0 ? 'none' : '';
+
             if (this.items.length === 0) {
                 list.innerHTML = '<div class="cd-empty">Košík je prázdny.<br><small>Pridajte si produkty z eshopu.</small></div>';
                 if (subEl) subEl.textContent = '€0,00';
@@ -147,6 +151,14 @@
         // Open via header click
         const open = e.target.closest('[data-cart-open]');
         if (open) { e.preventDefault(); openCart(); return; }
+
+        // Any link to the checkout is a no-op while the cart is empty
+        const toCheckout = e.target.closest('a[href$="/pokladna"]');
+        if (toCheckout && Cart.items.length === 0) {
+            e.preventDefault();
+            Cart.flash('Košík je prázdny');
+            return;
+        }
 
         // Close via backdrop or close button
         const close = e.target.closest('[data-cart-close]');

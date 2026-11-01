@@ -300,6 +300,8 @@
         if (!c) return;
         const summary = document.querySelector('[data-checkout-summary]');
         if (c.items.length === 0) {
+            // Empty cart (direct URL, another tab cleared it) → back to the cart page.
+            window.location.replace(@json(route('cart.show')));
             summary.innerHTML = '<div class="ck-empty">Košík je prázdny. <a href="{{ route('shop.index') }}">Späť do eshopu</a></div>';
             document.querySelector('.ck-submit').disabled = true;
             return;
