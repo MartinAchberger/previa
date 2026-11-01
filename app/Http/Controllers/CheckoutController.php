@@ -6,12 +6,14 @@ use App\Mail\AdminNewOrderMail;
 use App\Mail\InvoiceMail;
 use App\Mail\OrderConfirmationMail;
 use App\Models\B2bUser;
+use App\Models\DiscountCode;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Services\StripeService;
 use App\Services\SuperFaktura\SuperFakturaService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -106,6 +108,24 @@ class CheckoutController extends Controller
             ->exists();
     }
 
+    /**
+     * AJAX check of a discount code from the checkout summary. The price is
+     * recomputed server-side in store() — this only drives the preview.
+     */
+    public function discountCode(Request $request): JsonResponse
+    {
+        if (Auth::guard('b2b')->check()) {
+            return response()->json(['message' => 'Zľavové kódy nie je možné kombinovať so zľavou pre salón.'], 422);
+        }
+
+        $code = DiscountCode::findUsable($request->input('code'));
+        if (!$code) {
+            return response()->json(['message' => 'Zľavový kód je neplatný.'], 422);
+        }
+
+        return response()->json(['code' => $code->code, 'name' => $code->name, 'percent' => $code->percent]);
+    }
+
     public function store(Request $request): RedirectResponse
     {
         if (is_string($request->input('items'))) {
@@ -134,6 +154,7 @@ class CheckoutController extends Controller
             'delivery_choice'  => 'required|in:' . implode(',', array_keys($deliveryOptions)),
             'notes'            => 'nullable|string|max:1000',
             'gift_bag'         => 'nullable|string|in:' . implode(',', $this->giftBags()->pluck('code')->all()),
+            'discount_code'    => 'nullable|string|max:40',
             'terms'            => 'accepted',
             'items'            => 'required|array|min:1',
             'items.*.id'       => 'required|string|max:80',
@@ -224,7 +245,16 @@ class CheckoutController extends Controller
             return back()->withErrors(['items' => 'Košík je prázdny alebo obsahuje neplatné produkty.'])->withInput();
         }
 
-        $discountPct = $b2b ? (int) $b2b->discount_pct : 0;
+        // Discount code is for retail customers only — salons have their own discount.
+        $discountCode = null;
+        if (!$b2b && filled($data['discount_code'] ?? null)) {
+            $discountCode = DiscountCode::findUsable($data['discount_code']);
+            if (!$discountCode) {
+                return back()->withErrors(['discount_code' => 'Zľavový kód je neplatný.'])->withInput();
+            }
+        }
+
+        $discountPct = $b2b ? (int) $b2b->discount_pct : (int) ($discountCode?->percent ?? 0);
 
         $lines = [];
         $subtotal = 0;
@@ -242,7 +272,7 @@ class CheckoutController extends Controller
             }
 
             // Product sale discount applies to everyone (shade price or base price),
-            // then the B2B salon discount stacks on top.
+            // then the B2B salon discount / discount code stacks on top.
             $rawPrice = isset($shade['price']) ? (float) $shade['price'] : (float) $product->price;
             $basePrice = $product->discountedPrice($rawPrice);
             $qty = $item['qty'];
@@ -288,7 +318,7 @@ class CheckoutController extends Controller
         $shipping = self::shippingCostFor($choice, $subtotal);
         $total = round($subtotal + $shipping, 2);
 
-        $order = DB::transaction(function () use ($data, $lines, $subtotalBeforeDiscount, $discountValue, $shipping, $total, $discountPct, $b2b, $isCompany, $shippingMethod, $shippingCarrier) {
+        $order = DB::transaction(function () use ($data, $lines, $subtotalBeforeDiscount, $discountValue, $shipping, $total, $discountPct, $discountCode, $b2b, $isCompany, $shippingMethod, $shippingCarrier) {
             $order = Order::create([
                 'order_number'     => Order::generateOrderNumber('PR'),
                 'b2b_user_id'      => $b2b?->id,
@@ -310,6 +340,7 @@ class CheckoutController extends Controller
                 'subtotal'         => $subtotalBeforeDiscount,
                 'discount'         => $discountValue,
                 'discount_pct'     => $discountPct,
+                'discount_code'    => $discountCode?->code,
                 'shipping'         => $shipping,
                 'total'            => $total,
                 'payment_method'   => $data['payment_method'],

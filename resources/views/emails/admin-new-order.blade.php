@@ -9,7 +9,9 @@
         <tr><td style="padding:3px 0;color:#8a857b;">Platba</td><td style="padding:3px 0;">{{ $order->paymentLabel() }} · {{ $order->payment_status }}</td></tr>
         <tr><td style="padding:3px 0;color:#8a857b;">Doprava</td><td style="padding:3px 0;">{{ $order->deliveryLabel() }} · {{ $order->shipping > 0 ? '€'.number_format($order->shipping, 2, ',', ' ') : 'zadarmo' }}</td></tr>
         <tr><td style="padding:3px 0;color:#8a857b;vertical-align:top;">Adresa</td><td style="padding:3px 0;">{{ $order->shipping_address }}, {{ $order->shipping_zip }} {{ $order->shipping_city }}@if($order->pickup_point_name && $order->pickup_point_name !== $order->shipping_address)<br>{{ $order->pickup_point_name }}@endif</td></tr>
-        @if ($order->order_type === 'b2b' && $order->discount_pct > 0)
+        @if ($order->discount_code)
+        <tr><td style="padding:3px 0;color:#8a857b;">Zľavový kód</td><td style="padding:3px 0;">{{ $order->discount_code }} · −{{ $order->discount_pct }} % (−€{{ number_format($order->discount, 2, ',', ' ') }})</td></tr>
+        @elseif ($order->order_type === 'b2b' && $order->discount_pct > 0)
         <tr><td style="padding:3px 0;color:#8a857b;">Zľava salónu</td><td style="padding:3px 0;">−{{ $order->discount_pct }} % (−€{{ number_format($order->discount, 2, ',', ' ') }})</td></tr>
         @endif
         <tr><td style="padding:3px 0;color:#8a857b;">Spolu</td><td style="padding:3px 0;"><strong>{{ $order->totalFormatted() }}</strong></td></tr>

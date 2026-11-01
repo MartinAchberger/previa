@@ -242,12 +242,26 @@
             <div class="ck-summary" data-checkout-summary>
                 <div class="ck-empty">Načítavam košík…</div>
             </div>
+            @unless ($b2b)
+            <div class="ck-coupon">
+                <div class="ck-fi">
+                    <label for="discount-code-input">Zľavový kód</label>
+                    <div class="ck-coupon-row">
+                        <input type="text" id="discount-code-input" maxlength="40" autocomplete="off" value="{{ old('discount_code') }}" placeholder="Zadajte kód">
+                        <button type="button" class="btn btn-line" id="discount-code-apply">Použiť</button>
+                    </div>
+                </div>
+                <input type="hidden" name="discount_code" id="discount-code" value="">
+                <p class="ck-note" id="discount-code-msg" @error('discount_code') style="color:#b3261e" @enderror>@error('discount_code'){{ $message }}@enderror</p>
+            </div>
+            @endunless
             <div class="ck-totals">
                 <div class="ck-trow"><span>Medzisúčet</span><strong data-ck-sub>€0,00</strong></div>
                 <div class="ck-trow" style="font-size:12px;color:var(--mute)"><span>z toho DPH 23 %</span><span data-ck-vat>€0,00</span></div>
                 @if ($b2b && $b2b->discount_pct > 0)
                     <div class="ck-trow ck-trow--discount"><span>Zľava pre salón (−{{ $b2b->discount_pct }} %)</span><strong data-ck-disc>−€0,00</strong></div>
                 @endif
+                <div class="ck-trow ck-trow--discount" data-ck-code-row style="display:none"><span data-ck-code-label></span><strong data-ck-code-disc>−€0,00</strong></div>
                 <div class="ck-trow"><span>Doprava</span><strong data-ck-ship>€0,00</strong></div>
                 <div class="ck-trow ck-trow--big"><span>Celkom</span><strong data-ck-tot>€0,00</strong></div>
             </div>
@@ -269,6 +283,8 @@
 <script>
 (function () {
     const DISCOUNT_PCT = {{ $b2b->discount_pct ?? 0 }};
+    // Applied discount code { code, percent } — retail only; the server recomputes prices.
+    let discountCode = null;
     const FREE_FROM = {{ (float) $freeShippingFrom }};
     const MIN_SHIP = {{ (float) $minShippingCost }};
     function fmt(n) { return '€' + n.toFixed(2).replace('.', ','); }
@@ -299,7 +315,21 @@
             </div>
         `).join('');
 
-        const sub = c.subtotal() + giftBagPrice();
+        // Discount code: per-unit rounding like the server (CheckoutController::store).
+        const codePct = discountCode ? discountCode.percent : 0;
+        const fullSub = c.subtotal() + giftBagPrice();
+        const sub = codePct > 0
+            ? c.items.reduce((s, i) => s + Math.round(i.price * (1 - codePct / 100) * 100) / 100 * i.qty, 0)
+                + Math.round(giftBagPrice() * (1 - codePct / 100) * 100) / 100
+            : fullSub;
+        const codeRow = document.querySelector('[data-ck-code-row]');
+        if (codeRow) {
+            codeRow.style.display = codePct > 0 ? '' : 'none';
+            if (codePct > 0) {
+                codeRow.querySelector('[data-ck-code-label]').textContent = 'Zľavový kód ' + discountCode.code + ' (−' + codePct + ' %)';
+                codeRow.querySelector('[data-ck-code-disc]').textContent = '−' + fmt(fullSub - sub);
+            }
+        }
         const vat = sub - sub / 1.23;
         const chosen = document.querySelector('input[name="delivery_choice"]:checked');
         const shipCost = chosen ? parseFloat(chosen.dataset.shipCost || '0') : MIN_SHIP;
@@ -320,6 +350,73 @@
 
     document.addEventListener('cart:change', render);
     document.addEventListener('DOMContentLoaded', render);
+
+    // --- Zľavový kód: overenie cez server, cena sa prepočíta aj pri odoslaní ---
+    const codeInput = document.getElementById('discount-code-input');
+    const codeHidden = document.getElementById('discount-code');
+    const codeBtn = document.getElementById('discount-code-apply');
+    const codeMsg = document.getElementById('discount-code-msg');
+
+    function setCodeMsg(text, isError) {
+        codeMsg.textContent = text;
+        codeMsg.style.color = isError ? '#b3261e' : '';
+    }
+
+    function clearCode() {
+        discountCode = null;
+        codeHidden.value = '';
+        codeBtn.textContent = 'Použiť';
+        codeInput.disabled = false;
+        render();
+    }
+
+    async function applyCode() {
+        const value = codeInput.value.trim();
+        if (!value) { setCodeMsg('Zadajte zľavový kód.', true); return; }
+        codeBtn.disabled = true;
+        try {
+            const res = await fetch(@json(route('checkout.discount-code')), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({ code: value }),
+            });
+            const json = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                discountCode = null;
+                codeHidden.value = '';
+                setCodeMsg(json.message || 'Zľavový kód sa nepodarilo overiť.', true);
+            } else {
+                discountCode = { code: json.code, percent: json.percent };
+                codeHidden.value = json.code;
+                codeInput.value = json.code;
+                codeInput.disabled = true;
+                codeBtn.textContent = 'Odstrániť';
+                setCodeMsg(json.name + ' · −' + json.percent + ' %', false);
+            }
+        } catch (e) {
+            setCodeMsg('Zľavový kód sa nepodarilo overiť. Skúste znova.', true);
+        } finally {
+            codeBtn.disabled = false;
+            render();
+        }
+    }
+
+    if (codeInput) {
+        codeBtn.addEventListener('click', () => {
+            if (discountCode) { clearCode(); setCodeMsg('', false); } else { applyCode(); }
+        });
+        codeInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') { e.preventDefault(); if (!discountCode) applyCode(); }
+        });
+        // Re-apply a code kept after a failed submit (old input).
+        if (codeInput.value.trim() && !codeMsg.textContent.trim()) {
+            document.addEventListener('DOMContentLoaded', applyCode);
+        }
+    }
 
     // --- Darčekové balenie: dropdown, výber si pamätáme v localStorage ---
     const bagSelect = document.getElementById('gift-bag-select');

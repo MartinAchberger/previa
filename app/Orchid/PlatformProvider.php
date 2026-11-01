@@ -26,6 +26,10 @@ class PlatformProvider extends OrchidServiceProvider
                 ->title('Predaj')
                 ->badge(fn () => \App\Models\Order::whereIn('status', ['new'])->count() ?: null),
 
+            Menu::make('Zľavové kódy')
+                ->icon('bs.ticket-perforated')
+                ->route('platform.discount-codes'),
+
             Menu::make('B2B salóny')
                 ->icon('bs.building')
                 ->route('platform.b2b-users')
@@ -73,7 +77,7 @@ class PlatformProvider extends OrchidServiceProvider
         return [
             ItemPermission::group('Eshop')
                 ->addPermission('platform.eshop.orders', 'Objednávky a faktúry')
-                ->addPermission('platform.eshop.catalog', 'Produkty a línie')
+                ->addPermission('platform.eshop.catalog', 'Produkty, línie a zľavové kódy')
                 ->addPermission('platform.eshop.b2b', 'B2B salóny'),
             ItemPermission::group(__('System'))
                 ->addPermission('platform.systems.roles', __('Roles'))

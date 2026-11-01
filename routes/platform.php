@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Orchid\Screens\B2bUserEditScreen;
 use App\Orchid\Screens\B2bUserListScreen;
+use App\Orchid\Screens\DiscountCodeEditScreen;
+use App\Orchid\Screens\DiscountCodeListScreen;
 use App\Models\Order;
 use App\Orchid\Screens\OrderListScreen;
 use App\Orchid\Screens\OrderViewScreen;
@@ -103,6 +105,19 @@ Route::get('orders/{order}/invoice/{kind}', function (Order $order, string $kind
     $filename = ($kind === 'invoice' ? ($order->invoice_number ?: $order->order_number) : ($order->proforma_number ?: $order->order_number)) . '.pdf';
     return Storage::disk(SuperFakturaService::PDF_DISK)->download($path, $filename);
 })->name('platform.orders.invoice.download');
+
+// Discount codes
+Route::screen('discount-codes', DiscountCodeListScreen::class)
+    ->name('platform.discount-codes')
+    ->breadcrumbs(fn (Trail $trail) => $trail->parent('platform.index')->push('Zľavové kódy'));
+
+Route::screen('discount-codes/create', DiscountCodeEditScreen::class)
+    ->name('platform.discount-codes.create')
+    ->breadcrumbs(fn (Trail $trail) => $trail->parent('platform.discount-codes')->push('Nový kód'));
+
+Route::screen('discount-codes/{discountCode}/edit', DiscountCodeEditScreen::class)
+    ->name('platform.discount-codes.edit')
+    ->breadcrumbs(fn (Trail $trail, $discountCode) => $trail->parent('platform.discount-codes')->push($discountCode->code));
 
 // B2B users
 Route::screen('b2b-users', B2bUserListScreen::class)

@@ -37,7 +37,7 @@
     <div style="display:grid;grid-template-columns:1fr auto;gap:8px;font-size:14px">
         @if ($order->discount > 0)
             <div style="color:#6b6b66">Pred zľavou</div><div>€{{ number_format($order->subtotal, 2, ',', ' ') }}</div>
-            <div style="color:#6b6b66">Zľava (−{{ $order->discount_pct }} %)</div><div>−€{{ number_format($order->discount, 2, ',', ' ') }}</div>
+            <div style="color:#6b6b66">{{ $order->discount_code ? $order->discountLabel() : 'Zľava (−' . $order->discount_pct . ' %)' }}</div><div>−€{{ number_format($order->discount, 2, ',', ' ') }}</div>
         @else
             <div style="color:#6b6b66">Medzisúčet</div><div>€{{ number_format($order->subtotal, 2, ',', ' ') }}</div>
         @endif

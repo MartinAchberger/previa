@@ -91,7 +91,7 @@
     <div class="oc-totals">
         @if ($order->discount > 0)
             <div class="oc-trow"><span>Pred zľavou</span><strong>€{{ number_format($order->subtotal, 2, ',', ' ') }}</strong></div>
-            <div class="oc-trow oc-trow--disc"><span>Zľava pre salón (−{{ $order->discount_pct }} %)</span><strong>−€{{ number_format($order->discount, 2, ',', ' ') }}</strong></div>
+            <div class="oc-trow oc-trow--disc"><span>{{ $order->discountLabel() }}</span><strong>−€{{ number_format($order->discount, 2, ',', ' ') }}</strong></div>
             <div class="oc-trow"><span>Medzisúčet</span><strong>€{{ number_format($netSub, 2, ',', ' ') }}</strong></div>
         @else
             <div class="oc-trow"><span>Medzisúčet</span><strong>€{{ number_format($order->subtotal, 2, ',', ' ') }}</strong></div>

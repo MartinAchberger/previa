@@ -31,6 +31,9 @@ Route::post('/diagnostika', [HairQuizController::class, 'result'])
 // Cart + checkout
 Route::get('/kosik', [CartController::class, 'show'])->name('cart.show');
 Route::get('/pokladna', [CheckoutController::class, 'show'])->name('checkout.show');
+Route::post('/pokladna/zlavovy-kod', [CheckoutController::class, 'discountCode'])
+    ->middleware('throttle:20,1')
+    ->name('checkout.discount-code');
 Route::post('/objednat', [CheckoutController::class, 'store'])
     ->middleware('throttle:10,1')
     ->name('checkout.store');

@@ -20,7 +20,7 @@ class Order extends Model
         'company_name', 'ico', 'vat_id',
         'shipping_address', 'shipping_city', 'shipping_zip', 'shipping_country',
         'billing_address', 'billing_city', 'billing_zip', 'billing_country',
-        'subtotal', 'discount', 'shipping', 'total', 'discount_pct',
+        'subtotal', 'discount', 'shipping', 'total', 'discount_pct', 'discount_code',
         'payment_method', 'payment_status', 'paid_at', 'shipping_method',
         'stripe_payment_intent', 'refunded_at',
         'tracking_number', 'tracking_link', 'shipping_carrier', 'pickup_point_id', 'pickup_point_name', 'foxlog_status', 'foxlog_sent_at',
@@ -89,6 +89,14 @@ class Order extends Model
     public function statusLabel(): string
     {
         return self::STATUSES[$this->status] ?? $this->status;
+    }
+
+    /** Label of the discount row (salon discount or a checkout discount code). */
+    public function discountLabel(): string
+    {
+        return $this->discount_code
+            ? 'Zľavový kód ' . $this->discount_code . ' (−' . $this->discount_pct . ' %)'
+            : 'Zľava pre salón (−' . $this->discount_pct . ' %)';
     }
 
     /** Human label of the chosen delivery option (admin mail, confirmation). */

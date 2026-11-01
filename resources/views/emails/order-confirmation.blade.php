@@ -14,6 +14,12 @@
                 <td align="right" style="padding:8px 0;border-bottom:1px solid #eee;font-size:13px;white-space:nowrap;">{{ $item->lineTotalFormatted() }}</td>
             </tr>
         @endforeach
+        @if ($order->discount_code && $order->discount > 0)
+        <tr>
+            <td style="padding:8px 0;font-size:13px;color:#8a857b;">{{ $order->discountLabel() }} · už zahrnuté v cenách</td>
+            <td align="right" style="padding:8px 0;font-size:13px;color:#8a857b;">ušetrené €{{ number_format($order->discount, 2, ',', ' ') }}</td>
+        </tr>
+        @endif
         <tr>
             <td style="padding:8px 0;font-size:13px;color:#8a857b;">Doprava</td>
             <td align="right" style="padding:8px 0;font-size:13px;">{{ $order->shipping > 0 ? '€'.number_format($order->shipping, 2, ',', ' ') : 'zadarmo' }}</td>
