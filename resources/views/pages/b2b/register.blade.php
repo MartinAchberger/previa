@@ -9,7 +9,7 @@
         <div class="auth-head">
             <p class="eyebrow">Pre profesionálne salóny</p>
             <h1>Pridajte sa k PREVIA.</h1>
-            <p class="lede" style="margin:0">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+            <p class="lede" style="margin:0">Zaregistrujte svoj salón a získajte prístup k prémiovej talianskej vlasovej kozmetike za partnerské ceny, k odbornému vzdelávaniu a individuálnej podpore. Žiadosť posúdime a ozveme sa vám do 3 pracovných dní.</p>
         </div>
 
         @if ($errors->any())
