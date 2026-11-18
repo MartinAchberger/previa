@@ -145,6 +145,10 @@ Route::screen('products/{product}/edit', ProductEditScreen::class)
     ->name('platform.products.edit')
     ->breadcrumbs(fn (Trail $trail, $product) => $trail->parent('platform.products')->push($product->name));
 
+Route::screen('stock', \App\Orchid\Screens\StockListScreen::class)
+    ->name('platform.stock')
+    ->breadcrumbs(fn (Trail $trail) => $trail->parent('platform.index')->push('Sklad'));
+
 Route::screen('lines', ProductLineListScreen::class)
     ->name('platform.lines')
     ->breadcrumbs(fn (Trail $trail) => $trail->parent('platform.index')->push('Línie'));

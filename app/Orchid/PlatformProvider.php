@@ -41,6 +41,12 @@ class PlatformProvider extends OrchidServiceProvider
                 ->route('platform.products')
                 ->title('Katalóg'),
 
+            Menu::make('Sklad')
+                ->icon('bs.boxes')
+                ->route('platform.stock')
+                ->permission('platform.eshop.catalog')
+                ->badge(fn () => \App\Orchid\Screens\StockListScreen::items()->whereIn('state', ['out', 'low'])->count() ?: null, Color::DANGER),
+
             Menu::make('Línie')
                 ->icon('bs.collection')
                 ->route('platform.lines')
