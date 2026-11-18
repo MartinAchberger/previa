@@ -23,6 +23,7 @@
         const cap = Number.isFinite(parseInt(max, 10)) && parseInt(max, 10) > 0 ? Math.min(MAX_QTY, parseInt(max, 10)) : MAX_QTY;
         return Math.min(cap, n);
     };
+    const stockMsg = (max) => `Na sklade máme už len ${parseInt(max, 10)} ks.`;
 
     const Cart = {
         items: [],
@@ -46,19 +47,29 @@
         count() { return this.items.reduce((s, i) => s + i.qty, 0); },
         subtotal() { return this.items.reduce((s, i) => s + i.qty * i.price, 0); },
         find(id) { return this.items.find(i => i.id === id); },
+        // Returns false when the stock cap cut the quantity (a notice is shown).
         add(item) {
             const ex = this.find(item.id);
-            if (ex) { ex.max = item.max ?? ex.max; ex.qty = clampQty(ex.qty + (item.qty || 1), ex.max); }
-            else this.items.push({ ...item, qty: clampQty(item.qty || 1, item.max) });
+            const wanted = (ex ? ex.qty : 0) + (Math.floor(Number(item.qty)) || 1);
+            let it = ex;
+            if (ex) { ex.max = item.max ?? ex.max; ex.qty = clampQty(wanted, ex.max); }
+            else { it = { ...item, qty: clampQty(wanted, item.max) }; this.items.push(it); }
             this.save();
+            if (it.qty < wanted && it.qty < MAX_QTY) {
+                this.flash(stockMsg(it.max));
+                return false;
+            }
             this.flash(`${item.name} pridané do košíka`);
+            return true;
         },
         update(id, qty) {
             const it = this.find(id);
             if (!it) return;
             it.qty = clampQty(qty, it.max);
+            if (it.qty < Math.floor(Number(qty)) && it.qty < MAX_QTY) this.flash(stockMsg(it.max));
             this.save();
         },
+        stockMsg,
         remove(id) {
             this.items = this.items.filter(i => i.id !== id);
             this.save();

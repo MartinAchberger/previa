@@ -186,7 +186,7 @@
                                         <div class="pdp-shade-pr">@if($sOos) Vypredané @else €{{ number_format($sPrice, 2, ',', ' ') }} @endif</div>
                                         <div class="pdp-shade-qty">
                                             <button type="button" data-q-dec aria-label="Znížiť" @disabled($sOos)>−</button>
-                                            <input type="number" min="0" max="99" value="0" data-q aria-label="Množstvo" @disabled($sOos)>
+                                            <input type="number" min="0" max="{{ isset($shade['stock']) ? max(0, min(99, (int) $shade['stock'])) : 99 }}" value="0" data-q aria-label="Množstvo" @disabled($sOos)>
                                             <button type="button" data-q-inc aria-label="Zvýšiť" @disabled($sOos)>+</button>
                                         </div>
                                     </div>
@@ -253,6 +253,17 @@
                 }
                 recompute();
 
+                // Cap a shade's quantity at its stock (input max) and say why.
+                const capQty = (card, v) => {
+                    const max = parseInt(card.querySelector('[data-q]').max, 10) || 99;
+                    if (v > max) {
+                        const stock = JSON.parse(card.dataset.product).max;
+                        if (stock != null && window.PhCart?.flash) window.PhCart.flash(window.PhCart.stockMsg(stock));
+                        return max;
+                    }
+                    return v;
+                };
+
                 body.addEventListener('click', (e) => {
                     const dec = e.target.closest('[data-q-dec]');
                     const inc = e.target.closest('[data-q-inc]');
@@ -261,7 +272,7 @@
                         if (card.hasAttribute('data-oos')) return;
                         const input = card.querySelector('[data-q]');
                         let v = parseInt(input.value, 10) || 0;
-                        v = dec ? Math.max(0, v - 1) : Math.min(99, v + 1);
+                        v = dec ? Math.max(0, v - 1) : capQty(card, v + 1);
                         input.value = v;
                         recompute();
                         return;
@@ -272,7 +283,7 @@
                         if (card.hasAttribute('data-oos')) return;
                         const input = card.querySelector('[data-q]');
                         let v = parseInt(input.value, 10) || 0;
-                        v = Math.min(99, v + 1);
+                        v = capQty(card, v + 1);
                         input.value = v;
                         recompute();
                     }
@@ -282,7 +293,7 @@
                     if (!e.target.matches('[data-q]')) return;
                     let v = parseInt(e.target.value, 10);
                     if (isNaN(v) || v < 0) v = 0;
-                    if (v > 99) v = 99;
+                    v = capQty(e.target.closest('[data-shade]'), Math.min(99, v));
                     e.target.value = v;
                     recompute();
                 });
@@ -305,12 +316,12 @@
 
                 addBtn.addEventListener('click', () => {
                     if (!window.PhCart || addBtn.disabled) return;
-                    let total = 0;
+                    let total = 0, capped = false;
                     root.querySelectorAll('[data-shade]').forEach(el => {
                         const q = parseInt(el.querySelector('[data-q]').value, 10) || 0;
                         if (q <= 0) return;
                         const data = JSON.parse(el.dataset.product);
-                        window.PhCart.add({
+                        if (window.PhCart.add({
                             id: String(data.id),
                             code: data.code,
                             name: data.name,
@@ -320,12 +331,12 @@
                             swatch: data.swatch || null,
                             max: data.max ?? null,
                             qty: q,
-                        });
+                        }) === false) capped = true;
                         el.querySelector('[data-q]').value = 0;
                         total += q;
                     });
                     recompute();
-                    if (typeof window.PhCart.flash === 'function') {
+                    if (!capped && typeof window.PhCart.flash === 'function') {
                         window.PhCart.flash(total + ' ks pridaných do košíka');
                     }
                 });
@@ -382,7 +393,11 @@
                 const product = JSON.parse(addBtn.dataset.product);
 
                 document.getElementById('pdp-qty-dec').addEventListener('click', () => { qty = Math.max(1, qty - 1); qtyVal.textContent = qty; });
-                document.getElementById('pdp-qty-inc').addEventListener('click', () => { qty = Math.min(product.max ?? 99, 99, qty + 1); qtyVal.textContent = qty; });
+                document.getElementById('pdp-qty-inc').addEventListener('click', () => {
+                    const cap = Math.min(product.max ?? 99, 99);
+                    if (qty >= cap && product.max != null && window.PhCart?.flash) window.PhCart.flash(window.PhCart.stockMsg(product.max));
+                    qty = Math.min(cap, qty + 1); qtyVal.textContent = qty;
+                });
 
                 addBtn.addEventListener('click', () => {
                     if (window.PhCart) {
