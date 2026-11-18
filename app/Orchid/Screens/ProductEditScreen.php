@@ -198,6 +198,9 @@ class ProductEditScreen extends Screen
             $oldStock = collect((array) $product->shades)
                 ->filter(fn ($s) => is_array($s) && isset($s['code'], $s['stock']))
                 ->mapWithKeys(fn ($s) => [trim((string) $s['code']) => (int) $s['stock']]);
+            $oldStockAt = collect((array) $product->shades)
+                ->filter(fn ($s) => is_array($s) && isset($s['code'], $s['stock_at']))
+                ->mapWithKeys(fn ($s) => [trim((string) $s['code']) => (string) $s['stock_at']]);
             $data['shades'] = collect($data['shades'])
                 ->filter(fn ($row) => is_array($row) && !empty($row['code']))
                 ->map(fn ($row) => array_filter([
@@ -210,7 +213,8 @@ class ProductEditScreen extends Screen
                         : null,
                     'sku'   => trim((string) ($row['sku'] ?? '')) ?: null,
                     'stock' => $oldStock->get(trim((string) $row['code'])),
-                ], fn ($v, $k) => !in_array($k, ['sku', 'stock'], true) || $v !== null, ARRAY_FILTER_USE_BOTH))
+                    'stock_at' => $oldStockAt->get(trim((string) $row['code'])),
+                ], fn ($v, $k) => !in_array($k, ['sku', 'stock', 'stock_at'], true) || $v !== null, ARRAY_FILTER_USE_BOTH))
                 ->values()
                 ->all();
             if (empty($data['shades'])) {
@@ -219,7 +223,12 @@ class ProductEditScreen extends Screen
         }
 
         $oldGroup = $product->variant_group;
-        $product->fill($data)->save();
+        $product->fill($data);
+        // A level typed in by hand counts as a fresh stock count (like a Foxlog report).
+        if ($product->isDirty('stock')) {
+            $product->stock_synced_at = $product->stock === null ? null : now();
+        }
+        $product->save();
 
         // Size variants: admin selects every other size of the same product. All
         // selected products + this one share one variant_group (handles 2, 3 or

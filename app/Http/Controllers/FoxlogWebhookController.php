@@ -75,6 +75,7 @@ class FoxlogWebhookController extends Controller
                         $lowNow[] = trim($product->name . ' · ' . ($shades[$i]['code'] ?? '') . ' ' . ($shades[$i]['name'] ?? '')) . ' (SKU ' . $sku . '): ' . ($level <= 0 ? 'vypredané' : $level . ' ks');
                     }
                     $shades[$i]['stock'] = $level;
+                    $shades[$i]['stock_at'] = now()->toIso8601String();
                     $product->shades = $shades;
                     $touchedShadeProducts[$product->id] = $product;
                 }
@@ -88,7 +89,7 @@ class FoxlogWebhookController extends Controller
                     $lowNow[] = trim($product->name . ' ' . ($product->volume ?: '')) . ' (SKU ' . $sku . '): ' . ($level <= 0 ? 'vypredané' : $level . ' ks');
                 }
             }
-            Product::withoutGlobalScopes()->where('sku', $sku)->update(['stock' => $level]);
+            Product::withoutGlobalScopes()->where('sku', $sku)->update(['stock' => $level, 'stock_synced_at' => now()]);
         }
 
         foreach ($touchedShadeProducts as $product) {

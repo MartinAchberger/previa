@@ -20,8 +20,14 @@ class StockListLayout extends Table
             TD::make('volume', 'Objem')->width('90px'),
             TD::make('variant', 'Odtieň'),
             TD::make('sku', 'SKU (Foxlog)'),
-            TD::make('stock', 'Stav (ks)')->alignRight()->width('100px')->render(fn (Repository $r) =>
-                $r->get('stock') === null ? '—' : '<strong>' . (int) $r->get('stock') . '</strong>'
+            TD::make('level', 'Sklad (Foxlog)')->alignRight()->width('120px')->render(fn (Repository $r) =>
+                $r->get('level') === null ? '—' : (string) (int) $r->get('level')
+            ),
+            TD::make('reserved', 'Rezervované')->alignRight()->width('110px')->render(fn (Repository $r) =>
+                $r->get('reserved') ? (string) (int) $r->get('reserved') : '—'
+            ),
+            TD::make('available', 'Dostupné')->alignRight()->width('100px')->render(fn (Repository $r) =>
+                $r->get('available') === null ? '—' : '<strong>' . (int) $r->get('available') . '</strong>'
             ),
             TD::make('state', '')->width('130px')->render(fn (Repository $r) => self::badge($r->get('state'))),
             TD::make('published', 'Pub.')->width('60px')->render(fn (Repository $r) => $r->get('published') ? '✓' : '-'),

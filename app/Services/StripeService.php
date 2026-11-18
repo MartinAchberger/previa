@@ -56,6 +56,8 @@ class StripeService
             'success_url' => route('stripe.success', ['orderNumber' => $order->order_number]) . '?session_id={CHECKOUT_SESSION_ID}',
             'cancel_url' => route('stripe.cancel', ['orderNumber' => $order->order_number]),
             'locale' => 'sk',
+            // Unpaid card orders hold stock only this long (see StockService).
+            'expires_at' => now()->addMinutes(\App\Services\StockService::CARD_SESSION_MINUTES)->timestamp,
         ]);
     }
 

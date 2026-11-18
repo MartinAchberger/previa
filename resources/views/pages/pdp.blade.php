@@ -98,6 +98,7 @@
                 'line'    => $product->line_label,
                 'volume'  => $vol,
                 'price'   => $effPrice,
+                'max'     => $product->stock,
             ];
             $hasShades = $product->hasShades();
             $shadesGrouped = $hasShades ? $product->shadesGrouped() : [];
@@ -168,6 +169,7 @@
                                             'volume' => $vol,
                                             'price'  => $sPrice,
                                             'swatch' => $sColor,
+                                            'max'    => isset($shade['stock']) ? (int) $shade['stock'] : null,
                                         ];
                                     @endphp
                                     <div class="pdp-shade @if($sOos) is-oos @endif" data-shade @if($sOos) data-oos @endif
@@ -316,6 +318,7 @@
                             volume: data.volume,
                             price: parseFloat(data.price),
                             swatch: data.swatch || null,
+                            max: data.max ?? null,
                             qty: q,
                         });
                         el.querySelector('[data-q]').value = 0;
@@ -379,7 +382,7 @@
                 const product = JSON.parse(addBtn.dataset.product);
 
                 document.getElementById('pdp-qty-dec').addEventListener('click', () => { qty = Math.max(1, qty - 1); qtyVal.textContent = qty; });
-                document.getElementById('pdp-qty-inc').addEventListener('click', () => { qty = Math.min(99, qty + 1); qtyVal.textContent = qty; });
+                document.getElementById('pdp-qty-inc').addEventListener('click', () => { qty = Math.min(product.max ?? 99, 99, qty + 1); qtyVal.textContent = qty; });
 
                 addBtn.addEventListener('click', () => {
                     if (window.PhCart) {

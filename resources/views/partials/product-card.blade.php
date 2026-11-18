@@ -15,6 +15,7 @@
         'line'    => $p->line_label,
         'volume'  => $p->volume,
         'price'   => $effectivePrice,
+        'max'     => $p->stock,
     ];
 @endphp
 <div class="card-wrap">

@@ -4,6 +4,7 @@ namespace App\Orchid\Screens;
 
 use App\Models\Product;
 use App\Orchid\Layouts\StockListLayout;
+use App\Services\StockService;
 use Illuminate\Support\Collection;
 use Orchid\Screen\Actions\Link;
 use Orchid\Screen\Repository;
@@ -32,7 +33,7 @@ class StockListScreen extends Screen
 
     public function description(): string
     {
-        return 'Stav zásob podľa skladu Foxlog. Nízky stav = ' . self::threshold() . ' ks a menej. Nesledované = Foxlog pre SKU ešte neposlal stav, produkt sa predáva bez obmedzenia.';
+        return 'Sklad = posledný stav z Foxlogu. Rezervované = kusy v našich objednávkach, ktoré v ňom ešte nie sú započítané. Dostupné = koľko sa dá ešte predať. Nízky stav = ' . self::threshold() . ' ks a menej. Nesledované = Foxlog pre SKU ešte neposlal stav, produkt sa predáva bez obmedzenia.';
     }
 
     public function query(): array
@@ -99,36 +100,27 @@ class StockListScreen extends Screen
     {
         $rank = ['out' => 0, 'low' => 1, 'ok' => 2, 'untracked' => 3];
 
-        return Product::orderBy('sort_order')->get()
-            ->flatMap(function (Product $p) {
-                if (!$p->hasShades()) {
-                    $stock = $p->stock === null ? null : (int) $p->stock;
-                    return [self::row($p, '—', $p->sku ?: $p->code, $stock)];
-                }
-                return collect($p->shades)
-                    ->filter(fn ($s) => is_array($s) && isset($s['code']))
-                    ->map(fn (array $s) => self::row(
-                        $p,
-                        trim($s['code'] . ' ' . ($s['name'] ?? '')),
-                        $p->shadeSku($s),
-                        isset($s['stock']) ? (int) $s['stock'] : null,
-                    ));
-            })
-            ->sort(fn ($a, $b) => [$rank[$a['state']], $a['stock'] ?? PHP_INT_MAX, $a['sort']]
-                              <=> [$rank[$b['state']], $b['stock'] ?? PHP_INT_MAX, $b['sort']])
+        return StockService::items(Product::orderBy('sort_order')->get())
+            ->map(fn (array $i) => self::row($i))
+            ->sort(fn ($a, $b) => [$rank[$a['state']], $a['available'] ?? PHP_INT_MAX, $a['sort']]
+                              <=> [$rank[$b['state']], $b['available'] ?? PHP_INT_MAX, $b['sort']])
             ->values();
     }
 
-    private static function row(Product $p, string $variant, string $sku, ?int $stock): array
+    private static function row(array $i): array
     {
+        $p = $i['product'];
+        $shade = $i['shade'];
         return [
             'product_id' => $p->id,
             'name'       => $p->name,
             'volume'     => $p->volume,
-            'variant'    => $variant,
-            'sku'        => $sku,
-            'stock'      => $stock,
-            'state'      => self::stateOf($stock),
+            'variant'    => $shade ? trim($shade['code'] . ' ' . ($shade['name'] ?? '')) : '—',
+            'sku'        => $i['sku'],
+            'level'      => $i['level'],
+            'reserved'   => $i['reserved'],
+            'available'  => $i['available'],
+            'state'      => self::stateOf($i['available']),
             'published'  => (bool) $p->published,
             'sort'       => (int) $p->sort_order,
         ];

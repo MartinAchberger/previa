@@ -14,10 +14,14 @@
         ? String(v).trim() : null;
 
     const MAX_QTY = 99;
-    const clampQty = (n) => {
+    // `max` = pieces on stock when the product is tracked (null = unlimited).
+    // The server re-checks real availability at checkout; this only keeps the
+    // cart from offering more than the warehouse has.
+    const clampQty = (n, max) => {
         n = Math.floor(Number(n));
         if (!Number.isFinite(n) || n < 1) return 1;
-        return Math.min(MAX_QTY, n);
+        const cap = Number.isFinite(parseInt(max, 10)) && parseInt(max, 10) > 0 ? Math.min(MAX_QTY, parseInt(max, 10)) : MAX_QTY;
+        return Math.min(cap, n);
     };
 
     const Cart = {
@@ -34,7 +38,7 @@
                     ...i,
                     id: String(i.id),
                     price: Number.isFinite(parseFloat(i.price)) ? parseFloat(i.price) : 0,
-                    qty: clampQty(i.qty),
+                    qty: clampQty(i.qty, i.max),
                 }));
         },
         save() { localStorage.setItem(KEY, JSON.stringify(this.items)); this.render(); this.emit(); },
@@ -44,15 +48,15 @@
         find(id) { return this.items.find(i => i.id === id); },
         add(item) {
             const ex = this.find(item.id);
-            if (ex) ex.qty = clampQty(ex.qty + (item.qty || 1));
-            else this.items.push({ ...item, qty: clampQty(item.qty || 1) });
+            if (ex) { ex.max = item.max ?? ex.max; ex.qty = clampQty(ex.qty + (item.qty || 1), ex.max); }
+            else this.items.push({ ...item, qty: clampQty(item.qty || 1, item.max) });
             this.save();
             this.flash(`${item.name} pridané do košíka`);
         },
         update(id, qty) {
             const it = this.find(id);
             if (!it) return;
-            it.qty = clampQty(qty);
+            it.qty = clampQty(qty, it.max);
             this.save();
         },
         remove(id) {
@@ -178,6 +182,7 @@
                     volume: data.volume,
                     price: parseFloat(data.price),
                     swatch: data.swatch || null,
+                    max: data.max ?? null,
                 });
                 openCart();
             } catch (err) { console.error(err); }

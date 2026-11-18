@@ -10,6 +10,7 @@ use App\Models\DiscountCode;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Services\StockService;
 use App\Services\StripeService;
 use App\Services\SuperFaktura\SuperFakturaService;
 use Illuminate\Contracts\View\View;
@@ -284,6 +285,7 @@ class CheckoutController extends Controller
             $lines[] = [
                 'product'    => $product,
                 'shade'      => $shade,
+                'sku'        => StockService::skuFor($product, $shade),
                 'qty'        => $qty,
                 'unit_price' => $unit,
                 'line_total' => $lineTotal,
@@ -309,7 +311,7 @@ class CheckoutController extends Controller
                 $unit = round($basePrice * (1 - $discountPct / 100), 2);
                 $subtotal += $unit;
                 $subtotalBeforeDiscount += $basePrice;
-                $lines[] = ['product' => $bag, 'shade' => null, 'qty' => 1, 'unit_price' => $unit, 'line_total' => $unit];
+                $lines[] = ['product' => $bag, 'shade' => null, 'sku' => StockService::skuFor($bag), 'qty' => 1, 'unit_price' => $unit, 'line_total' => $unit];
             }
         }
 
@@ -318,64 +320,77 @@ class CheckoutController extends Controller
         $shipping = self::shippingCostFor($choice, $subtotal);
         $total = round($subtotal + $shipping, 2);
 
-        $order = DB::transaction(function () use ($data, $lines, $subtotalBeforeDiscount, $discountValue, $shipping, $total, $discountPct, $discountCode, $b2b, $isCompany, $shippingMethod, $shippingCarrier) {
-            $order = Order::create([
-                'order_number'     => Order::generateOrderNumber('PR'),
-                'b2b_user_id'      => $b2b?->id,
-                'order_type'       => $b2b ? 'b2b' : 'b2c',
-                'customer_name'    => $data['customer_name'],
-                'customer_email'   => $data['customer_email'],
-                'customer_phone'   => $data['customer_phone'],
-                'company_name'     => $isCompany ? $data['company_name'] : null,
-                'ico'              => $isCompany ? $data['ico'] : null,
-                'vat_id'           => $isCompany ? ($data['vat_id'] ?? null) : null,
-                'shipping_address' => $data['shipping_address'],
-                'shipping_city'    => $data['shipping_city'],
-                'shipping_zip'     => $data['shipping_zip'],
-                'shipping_country' => strtoupper($data['shipping_country']),
-                'billing_address'  => $data['billing_address'],
-                'billing_city'     => $data['billing_city'],
-                'billing_zip'      => $data['billing_zip'],
-                'billing_country'  => strtoupper($data['billing_country']),
-                'subtotal'         => $subtotalBeforeDiscount,
-                'discount'         => $discountValue,
-                'discount_pct'     => $discountPct,
-                'discount_code'    => $discountCode?->code,
-                'shipping'         => $shipping,
-                'total'            => $total,
-                'payment_method'   => $data['payment_method'],
-                'payment_status'   => 'unpaid',
-                'shipping_method'  => $shippingMethod,
-                'shipping_carrier' => $shippingCarrier,
-                'pickup_point_id'  => $data['pickup_point_id'] ?? null,
-                'pickup_point_name' => $data['pickup_point_name'] ?? null,
-                'status'           => 'new',
-                'notes'            => $data['notes'] ?? null,
-            ]);
+        try {
+            $order = DB::transaction(function () use ($data, $lines, $subtotalBeforeDiscount, $discountValue, $shipping, $total, $discountPct, $discountCode, $b2b, $isCompany, $shippingMethod, $shippingCarrier) {
+                // Locks the stock items and checks them against what is already
+                // ordered — the order is created in the same transaction, so two
+                // checkouts can never both take the last pieces.
+                $short = $this->lockAndCheckStock($lines);
+                if (!empty($short)) {
+                    throw new \App\Exceptions\InsufficientStockException($short);
+                }
 
-            foreach ($lines as $line) {
-                $product = $line['product'];
-                $shade = $line['shade'] ?? null;
-                $code = $shade['code'] ?? $product->code;
-                $name = $shade
-                    ? trim($product->name . ' · ' . $shade['code'] . (!empty($shade['name']) ? ' ' . $shade['name'] : ''))
-                    : $product->name;
-                OrderItem::create([
-                    'order_id'           => $order->id,
-                    'product_id'         => $product->id,
-                    'product_code'       => $code,
-                    'product_name'       => $name,
-                    'product_subtitle'   => $product->subtitle,
-                    'product_volume'     => $product->volume,
-                    'product_line_label' => $product->line_label,
-                    'unit_price'         => $line['unit_price'],
-                    'qty'                => $line['qty'],
-                    'line_total'         => $line['line_total'],
+                $order = Order::create([
+                    'order_number'     => Order::generateOrderNumber('PR'),
+                    'b2b_user_id'      => $b2b?->id,
+                    'order_type'       => $b2b ? 'b2b' : 'b2c',
+                    'customer_name'    => $data['customer_name'],
+                    'customer_email'   => $data['customer_email'],
+                    'customer_phone'   => $data['customer_phone'],
+                    'company_name'     => $isCompany ? $data['company_name'] : null,
+                    'ico'              => $isCompany ? $data['ico'] : null,
+                    'vat_id'           => $isCompany ? ($data['vat_id'] ?? null) : null,
+                    'shipping_address' => $data['shipping_address'],
+                    'shipping_city'    => $data['shipping_city'],
+                    'shipping_zip'     => $data['shipping_zip'],
+                    'shipping_country' => strtoupper($data['shipping_country']),
+                    'billing_address'  => $data['billing_address'],
+                    'billing_city'     => $data['billing_city'],
+                    'billing_zip'      => $data['billing_zip'],
+                    'billing_country'  => strtoupper($data['billing_country']),
+                    'subtotal'         => $subtotalBeforeDiscount,
+                    'discount'         => $discountValue,
+                    'discount_pct'     => $discountPct,
+                    'discount_code'    => $discountCode?->code,
+                    'shipping'         => $shipping,
+                    'total'            => $total,
+                    'payment_method'   => $data['payment_method'],
+                    'payment_status'   => 'unpaid',
+                    'shipping_method'  => $shippingMethod,
+                    'shipping_carrier' => $shippingCarrier,
+                    'pickup_point_id'  => $data['pickup_point_id'] ?? null,
+                    'pickup_point_name' => $data['pickup_point_name'] ?? null,
+                    'status'           => 'new',
+                    'notes'            => $data['notes'] ?? null,
                 ]);
-            }
 
-            return $order;
-        });
+                foreach ($lines as $line) {
+                    $product = $line['product'];
+                    $shade = $line['shade'] ?? null;
+                    $code = $shade['code'] ?? $product->code;
+                    $name = $shade
+                        ? trim($product->name . ' · ' . $shade['code'] . (!empty($shade['name']) ? ' ' . $shade['name'] : ''))
+                        : $product->name;
+                    OrderItem::create([
+                        'order_id'           => $order->id,
+                        'product_id'         => $product->id,
+                        'product_code'       => $code,
+                        'sku'                => $line['sku'],
+                        'product_name'       => $name,
+                        'product_subtitle'   => $product->subtitle,
+                        'product_volume'     => $product->volume,
+                        'product_line_label' => $product->line_label,
+                        'unit_price'         => $line['unit_price'],
+                        'qty'                => $line['qty'],
+                        'line_total'         => $line['line_total'],
+                    ]);
+                }
+
+                return $order;
+            });
+        } catch (\App\Exceptions\InsufficientStockException $e) {
+            return back()->withErrors(['items' => 'Na sklade nemáme dostatok kusov: ' . implode(', ', $e->items) . '. Upravte prosím množstvo v košíku.'])->withInput();
+        }
 
         if ($order->payment_method === 'card') {
             try {
@@ -396,6 +411,45 @@ class CheckoutController extends Controller
         $this->afterOrderPlaced($order);
 
         return redirect($this->confirmationUrl($order));
+    }
+
+    /**
+     * Lock every product row behind the lines (and rows sharing their SKU),
+     * re-read the stock and compare it with the requested pieces per SKU.
+     * Must run inside the order transaction. Returns "name: only N ks" for
+     * each item that is short; empty when everything fits.
+     */
+    private function lockAndCheckStock(array $lines): array
+    {
+        $ids  = collect($lines)->map(fn ($l) => $l['product']->id)->unique()->values()->all();
+        $skus = collect($lines)->map(fn ($l) => $l['product']->sku ?: $l['product']->code)->unique()->values()->all();
+        $fresh = Product::withoutGlobalScopes()
+            ->where(fn ($q) => $q->whereIn('id', $ids)->orWhereIn('sku', $skus))
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get()
+            ->keyBy('id');
+
+        $wanted = [];
+        foreach ($lines as $line) {
+            $product = $fresh->get($line['product']->id) ?? $line['product'];
+            $shade = $line['shade'] ? ($product->findShade($line['shade']['code']) ?? $line['shade']) : null;
+            $sku = $line['sku'];
+            $wanted[$sku] ??= ['product' => $product, 'shade' => $shade, 'qty' => 0];
+            $wanted[$sku]['qty'] += $line['qty'];
+        }
+
+        $short = [];
+        foreach ($wanted as $w) {
+            $available = StockService::available($w['product'], $w['shade']);
+            if ($available !== null && $w['qty'] > $available) {
+                $label = $w['shade']
+                    ? trim($w['product']->name . ' · ' . $w['shade']['code'] . ' ' . ($w['shade']['name'] ?? ''))
+                    : trim($w['product']->name . ' ' . ($w['product']->volume ?: ''));
+                $short[] = $label . ($available > 0 ? ' (k dispozícii už len ' . $available . ' ks)' : ' (vypredané)');
+            }
+        }
+        return $short;
     }
 
     /**

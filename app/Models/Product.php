@@ -38,6 +38,7 @@ class Product extends Model
         'price' => 'decimal:2',
         'discount_percent' => 'integer',
         'stock' => 'integer',
+        'stock_synced_at' => 'datetime',
         'published' => 'boolean',
         'featured' => 'boolean',
         'b2b_only' => 'boolean',
