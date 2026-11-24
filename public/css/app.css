@@ -4500,11 +4500,11 @@ input.is-invalid, select.is-invalid, textarea.is-invalid {
 }
 
 .b2b-or-row--7 {
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 40px;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 120px;
 }
 
 .b2b-or-head:has(+ .b2b-or-row--7), .b2b-orders-table:has(.b2b-or-row--7) .b2b-or-head {
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 40px;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 120px;
 }
 
 .b2b-status {
@@ -6430,3 +6430,25 @@ input[type=radio], input[type=checkbox] {
 .pdp-shade.is-oos { opacity: .45; cursor: not-allowed; }
 .pdp-shade.is-oos .pdp-shade-swatch { filter: grayscale(.6); }
 .pdp-shade.is-oos .pdp-shade-pr { font-size: .75em; text-transform: uppercase; letter-spacing: .06em; }
+
+.b2b-or-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.b2b-or-link:hover {
+  text-decoration: underline;
+}
+
+.b2b-inv-dl {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+
+.b2b-inv-dl::before {
+  content: "↓ ";
+}

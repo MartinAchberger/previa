@@ -138,6 +138,16 @@ class Order extends Model
         return !empty($this->invoice_sf_id);
     }
 
+    /** PDF the customer may download: the regular invoice, else the proforma; never a cancelled one. */
+    public function downloadableInvoicePath(): ?string
+    {
+        if ($this->invoice_status === self::INVOICE_STATUS_CANCELLED) {
+            return null;
+        }
+        $path = $this->activeDocumentPdfPath();
+        return $path && \Illuminate\Support\Facades\Storage::disk(\App\Services\SuperFaktura\SuperFakturaService::PDF_DISK)->exists($path) ? $path : null;
+    }
+
     public function activeDocumentPdfPath(): ?string
     {
         return $this->invoice_pdf_path ?: $this->proforma_pdf_path;

@@ -88,18 +88,31 @@ class CheckoutController extends Controller
             'freeShippingFrom' => self::FREE_SHIPPING_FROM,
             'giftBags'        => $this->giftBags(),
             'b2b' => $b2b,
-            // Pay-by-invoice is offered only to approved salons that have no
-            // outstanding (unpaid) invoice order.
-            'canPayByInvoice' => $b2b && !$this->hasOutstandingInvoiceOrder($b2b),
+            // Pay-by-invoice: salons only, unless blocked (see invoiceBlockReason()).
+            'canPayByInvoice' => $b2b && $this->invoiceBlockReason($b2b) === null,
             // Pickup-point option shows only when the Packeta widget key is set.
             'packetaKey' => config('services.packeta.api_key'),
         ]);
     }
 
     /**
-     * True if the salon has an unpaid pay-by-invoice order still open — while one
-     * exists, further invoice orders are blocked (only card/COD allowed).
+     * Why this salon can't pay by invoice right now, or null when it can.
+     * - Admin blocked it on the salon (the rule in use).
+     * - Optional, off by default (config shop.invoice_block_when_unpaid): an
+     *   unpaid invoice order is still open.
      */
+    private function invoiceBlockReason(B2bUser $b2b): ?string
+    {
+        if ($b2b->invoice_blocked) {
+            return 'Platba na faktúru je pre váš salón momentálne nedostupná. Použite prosím dobierku alebo platbu kartou, prípadne nás kontaktujte.';
+        }
+        if (config('shop.invoice_block_when_unpaid') && $this->hasOutstandingInvoiceOrder($b2b)) {
+            return 'Máte neuhradenú objednávku na faktúru. Ďalšiu objednávku na faktúru je možné vytvoriť až po jej úhrade — teraz použite dobierku alebo platbu kartou.';
+        }
+        return null;
+    }
+
+    /** True if the salon has an unpaid pay-by-invoice order still open. */
     private function hasOutstandingInvoiceOrder(B2bUser $b2b): bool
     {
         return Order::where('b2b_user_id', $b2b->id)
@@ -199,8 +212,8 @@ class CheckoutController extends Controller
             if (!$b2b) {
                 return back()->withErrors(['payment_method' => 'Platba na faktúru je dostupná len pre prihlásené salóny.'])->withInput();
             }
-            if ($this->hasOutstandingInvoiceOrder($b2b)) {
-                return back()->withErrors(['payment_method' => 'Máte neuhradenú objednávku na faktúru. Ďalšiu objednávku na faktúru je možné vytvoriť až po jej úhrade — teraz použite dobierku alebo platbu kartou.'])->withInput();
+            if (($reason = $this->invoiceBlockReason($b2b)) !== null) {
+                return back()->withErrors(['payment_method' => $reason])->withInput();
             }
         }
 

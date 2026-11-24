@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Orchid\Screen\Actions\Button;
+use Orchid\Screen\Fields\CheckBox;
 use Orchid\Screen\Fields\Input;
 use Orchid\Screen\Fields\Select;
 use Orchid\Screen\Fields\TextArea;
@@ -68,6 +69,11 @@ class B2bUserEditScreen extends Screen
                 Input::make('user.country')->title('Krajina')->placeholder('SK')->maxlength(2)->value($this->user->country ?? 'SK'),
                 Select::make('user.status')->title('Stav účtu')->options(B2bUser::STATUSES)->required(),
                 Input::make('user.discount_pct')->type('number')->min(0)->max(50)->title('Zľava (%)')->help('0–50 %')->required(),
+                CheckBox::make('user.invoice_blocked')
+                    ->title('Platba na faktúru')
+                    ->placeholder('Zablokovať platbu na faktúru')
+                    ->sendTrueOrFalse()
+                    ->help($this->invoiceHelp()),
                 TextArea::make('user.notes')->title('Interná poznámka')->rows(3),
                 Input::make('new_password')->type('password')->title('Nastaviť nové heslo (voliteľné)')->help('Vyplň iba ak chceš resetovať heslo'),
             ]),
@@ -80,6 +86,24 @@ class B2bUserEditScreen extends Screen
         }
 
         return $layouts;
+    }
+
+    /** Help under the invoice switch: what it does + how many invoices are unpaid now. */
+    private function invoiceHelp(): string
+    {
+        $help = 'Kým nie je zaškrtnuté, salón môže objednávať na faktúru aj s neuhradenými faktúrami.';
+        if (!$this->exists) {
+            return $help;
+        }
+        $unpaid = $this->user->orders()
+            ->where('payment_method', 'transfer')
+            ->where('payment_status', 'unpaid')
+            ->where('status', '!=', 'cancelled');
+        $count = (clone $unpaid)->count();
+        if ($count === 0) {
+            return $help . ' Momentálne nemá žiadnu neuhradenú faktúru.';
+        }
+        return $help . sprintf(' Neuhradené objednávky na faktúru: %d (spolu %s €).', $count, number_format((float) $unpaid->sum('total'), 2, ',', ' '));
     }
 
     public function save(B2bUser $b2b_user, Request $request)
@@ -95,6 +119,7 @@ class B2bUserEditScreen extends Screen
 
         $data = $request->input('user');
         $data['discount_pct'] = max(0, min(50, (int) ($data['discount_pct'] ?? 0)));
+        $data['invoice_blocked'] = filter_var($data['invoice_blocked'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
         // Never let raw password / approval-time be mass-assigned from the form —
         // password is handled explicitly below, approved_at only via approve().

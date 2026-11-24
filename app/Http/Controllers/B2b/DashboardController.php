@@ -9,6 +9,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use App\Services\SuperFaktura\SuperFakturaService;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class DashboardController extends Controller
@@ -46,6 +49,19 @@ class DashboardController extends Controller
             throw new NotFoundHttpException();
         }
         return view('pages.b2b.order-detail', compact('order', 'b2b'));
+    }
+
+    /** Invoice PDF of the salon's own order (404 for anyone else's or when there is none). */
+    public function invoice(string $orderNumber): StreamedResponse
+    {
+        $b2b = Auth::guard('b2b')->user();
+        $order = Order::where('order_number', $orderNumber)->where('b2b_user_id', $b2b->id)->first();
+        $path = $order?->downloadableInvoicePath();
+        if (!$path) {
+            throw new NotFoundHttpException();
+        }
+        $name = preg_replace('/[^A-Za-z0-9._-]+/', '-', 'Faktura-' . ($order->activeDocumentNumber() ?: $order->order_number)) . '.pdf';
+        return Storage::disk(SuperFakturaService::PDF_DISK)->download($path, $name);
     }
 
     public function profile(): View

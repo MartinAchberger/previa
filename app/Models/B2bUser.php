@@ -18,13 +18,14 @@ class B2bUser extends Model implements AuthenticatableContract
     protected $fillable = [
         'email', 'password', 'contact_name', 'salon_name', 'phone',
         'ico', 'vat_id', 'address', 'city', 'zip', 'country',
-        'discount_pct', 'tier', 'status', 'notes', 'approved_at',
+        'discount_pct', 'invoice_blocked', 'tier', 'status', 'notes', 'approved_at',
     ];
 
     protected $hidden = ['password', 'remember_token'];
 
     protected $casts = [
         'discount_pct' => 'integer',
+        'invoice_blocked' => 'boolean',
         'approved_at' => 'datetime',
     ];
 

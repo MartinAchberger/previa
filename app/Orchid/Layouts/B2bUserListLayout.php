@@ -21,6 +21,9 @@ class B2bUserListLayout extends Table
             TD::make('contact_name', 'Kontakt')->filter(TD::FILTER_TEXT),
             TD::make('email', 'Email')->filter(TD::FILTER_TEXT),
             TD::make('discount_pct', 'Zľava')->sort()->render(fn (B2bUser $u) => '−' . $u->discount_pct . ' %'),
+            TD::make('invoice_blocked', 'Faktúra')->render(fn (B2bUser $u) => $u->invoice_blocked
+                ? '<span style="color:#b91c1c;font-weight:500">blokovaná</span>'
+                : '<span style="color:#6b6b66">povolená</span>'),
             TD::make('orders_count', 'Objednávky')->render(fn (B2bUser $u) => $u->orders_count ?? $u->orders()->count()),
             TD::make('status', 'Stav')->sort()->render(function (B2bUser $u) {
                 $colors = ['pending' => '#a16207', 'active' => '#047857', 'disabled' => '#b91c1c'];

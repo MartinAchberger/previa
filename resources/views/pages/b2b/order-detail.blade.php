@@ -58,6 +58,11 @@
             @else
                 <div style="color:var(--mute);font-size:12px">Čaká na úhradu.</div>
             @endif
+            @if ($order->downloadableInvoicePath())
+                <div style="margin-top:12px"><a href="{{ route('b2b.order.invoice', $order->order_number) }}" class="b2b-inv-dl">Stiahnuť faktúru {{ $order->activeDocumentNumber() }} (PDF)</a></div>
+            @else
+                <div style="margin-top:12px;color:var(--mute);font-size:12px">Faktúra zatiaľ nie je vystavená.</div>
+            @endif
             <div style="margin-top:12px">Kuriér · {{ $order->shipping > 0 ? '€'.number_format($order->shipping, 2, ',', ' ') : 'zadarmo' }}</div>
         </div>
     </div>

@@ -14,7 +14,7 @@
     </div>
     <h1>História <em>objednávok.</em></h1>
     <div class="meta">
-        <div class="ds">Všetky objednávky tvojho salónu. Klikni na riadok pre detail a faktúru.</div>
+        <div class="ds">Všetky objednávky tvojho salónu. Faktúru k objednávke si stiahneš priamo v zozname alebo v detaile objednávky.</div>
         <div class="cnt">{{ $orders->total() }} objednávok celkom</div>
     </div>
 </section>
@@ -31,18 +31,24 @@
                 <div>Suma</div>
                 <div>Stav</div>
                 <div>Platba</div>
-                <div></div>
+                <div>Faktúra</div>
             </div>
             @foreach ($orders as $o)
-                <a href="{{ route('b2b.order.detail', $o->order_number) }}" class="b2b-or-row b2b-or-row--7">
-                    <div><strong>{{ $o->order_number }}</strong></div>
+                <div class="b2b-or-row b2b-or-row--7">
+                    <div><a href="{{ route('b2b.order.detail', $o->order_number) }}" class="b2b-or-link"><strong>{{ $o->order_number }}</strong> →</a></div>
                     <div>{{ $o->created_at->format('j.n.Y') }}</div>
                     <div>{{ $o->items()->sum('qty') }} ks</div>
                     <div><strong>{{ $o->totalFormatted() }}</strong></div>
                     <div><span class="b2b-status b2b-status--{{ $o->status }}">{{ $o->statusLabel() }}</span></div>
                     <div style="font-size:12px;color:var(--mute)">{{ $o->paymentLabel() }}</div>
-                    <div style="text-align:right">→</div>
-                </a>
+                    <div>
+                        @if ($o->downloadableInvoicePath())
+                            <a href="{{ route('b2b.order.invoice', $o->order_number) }}" class="b2b-inv-dl">Stiahnuť PDF</a>
+                        @else
+                            <span style="font-size:12px;color:var(--mute)">—</span>
+                        @endif
+                    </div>
+                </div>
             @endforeach
         </div>
         <div style="margin-top:32px">{{ $orders->links() }}</div>
